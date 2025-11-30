@@ -1,38 +1,327 @@
-<div class="card">
-  <p-table [value]="clientes" [loading]="carregando" [tableStyle]="{ 'min-width': '50rem' }">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Nome</th>
-        <th>CPF</th>
-        <th>Email</th>
-        <th>Telefone</th>
-        <th>Status</th>
-        <th>Ações</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-cliente>
-      <tr>
-        <td>{{ cliente.nome }}</td>
-        <td>{{ cliente.cpf }}</td>
-        <td>{{ cliente.email }}</td>
-        <td>{{ cliente.telefone }}</td>
-        <td>
-          <p-tag 
-            [value]="cliente.ativo ? 'Ativo' : 'Inativo'" 
-            [severity]="getSeveridadeStatus(cliente.ativo)">
-          </p-tag>
-        </td>
-        <td>
-          <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"></p-button>
-          <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"></p-button>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="6" class="text-center">Nenhum cliente encontrado.</td>
-      </tr>
-    </ng-template>
-  </p-table>
-</div>
+<div class="flex flex-column min-h-screen surface-ground p-3 gap-3">
+  <!-- Confirm Modal Customizado -->
+  <app-confirm-modal
+    [(visible)]="modalExclusaoVisible"
+    title="Confirmar Exclusão"
+    [message]="'Deseja realmente excluir o cliente ' + (clienteParaExcluir?.nome || '') + '?'"
+    severity="danger"
+    (confirm)="executarExclusao()"
+    (cancel)="cancelarExclusao()"
+  ></app-confirm-modal>
 
+  <!-- Header da Página -->
+  <p-toolbar styleClass="surface-card border-round shadow-1 px-3 py-2">
+    <div class="flex flex-column md:flex-row md:align-items-center justify-content-between w-full gap-2">
+      <div class="flex flex-column gap-1">
+        <div class="flex align-items-center gap-2">
+          <i class="pi pi-users text-primary text-xl"></i>
+          <h2 class="m-0 text-xl font-semibold">Clientes</h2>
+        </div>
+        <p class="m-0 text-color-secondary text-sm">
+          Gerencie os clientes cadastrados no sistema
+        </p>
+      </div>
+
+      <div class="flex justify-content-end">
+        <p-button
+          label="Novo Cliente"
+          icon="pi pi-plus"
+          (onClick)="novoCliente()"
+          styleClass="p-button-success"
+        ></p-button>
+      </div>
+    </div>
+  </p-toolbar>
+
+  <!-- Filtros e Busca -->
+  <p-toolbar styleClass="surface-card border-round shadow-1 px-3 py-3">
+    <form class="w-full" [formGroup]="filtrosForm" (ngSubmit)="aoPesquisar()">
+      <div class="grid formgrid p-fluid row-gap-3 column-gap-3">
+        <!-- Linha 1: Nome -->
+        <div class="col-12 md:col-6 lg:col-4">
+          <p-floatLabel>
+            <input
+              pInputText
+              id="filtroNome"
+              type="text"
+              formControlName="nome"
+              class="w-full"
+            />
+            <label for="filtroNome">Nome do cliente</label>
+          </p-floatLabel>
+        </div>
+
+        <!-- Linha 2: CPF / Email / Telefone -->
+        <div class="col-12 md:col-4 lg:col-3">
+          <p-floatLabel>
+            <p-dropdown
+              inputId="filtroCpf"
+              [options]="opcoesFiltroCpf"
+              formControlName="cpf"
+              placeholder=" "
+              [showClear]="true"
+              [filter]="true"
+              styleClass="w-full"
+            ></p-dropdown>
+            <label for="filtroCpf">CPF</label>
+          </p-floatLabel>
+        </div>
+
+        <div class="col-12 md:col-4 lg:col-3">
+          <p-floatLabel>
+            <p-dropdown
+              inputId="filtroEmail"
+              [options]="opcoesFiltroEmail"
+              formControlName="email"
+              placeholder=" "
+              [showClear]="true"
+              [filter]="true"
+              styleClass="w-full"
+            ></p-dropdown>
+            <label for="filtroEmail">E-mail</label>
+          </p-floatLabel>
+        </div>
+
+        <div class="col-12 md:col-4 lg:col-3">
+          <p-floatLabel>
+            <p-dropdown
+              inputId="filtroTelefone"
+              [options]="opcoesFiltroTelefone"
+              formControlName="telefone"
+              placeholder=" "
+              [showClear]="true"
+              [filter]="true"
+              styleClass="w-full"
+            ></p-dropdown>
+            <label for="filtroTelefone">Telefone</label>
+          </p-floatLabel>
+        </div>
+
+        <!-- Linha 3: Status + Botão Pesquisar (última linha, alinhado à direita) -->
+        <div class="col-12 md:col-6">
+          <p-floatLabel>
+            <p-dropdown
+              inputId="status"
+              [options]="opcoesStatus"
+              formControlName="status"
+              optionLabel="label"
+              optionValue="value"
+              [showClear]="false"
+              [filter]="false"
+              styleClass="w-full"
+            ></p-dropdown>
+            <label for="status">Status</label>
+          </p-floatLabel>
+        </div>
+
+        <div class="col-12 md:col-6 flex justify-content-end align-items-center">
+          <p-button
+            type="submit"
+            label="Pesquisar"
+            icon="pi pi-search"
+          ></p-button>
+        </div>
+      </div>
+    </form>
+  </p-toolbar>
+
+  <!-- Conteúdo -->
+  <div class="flex-1 flex flex-column gap-3">
+    <!-- Loading -->
+    <div *ngIf="carregando$ | async" class="surface-card border-round shadow-1 p-3">
+      <div class="flex flex-column gap-3">
+        <p-skeleton height="3rem" *ngFor="let item of [1,2,3,4]"></p-skeleton>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div
+      *ngIf="!(carregando$ | async) && clientesFiltrados.length === 0"
+      class="surface-card border-round shadow-1 p-4 flex flex-column align-items-center text-center gap-3"
+    >
+      <i class="pi pi-inbox text-4xl text-500"></i>
+      <h3 class="m-0 text-xl">Nenhum cliente encontrado</h3>
+      <p class="m-0 text-sm" *ngIf="!listaVaziaSemFiltros">
+        Tente ajustar os filtros para encontrar o que procura.
+      </p>
+      <p class="m-0 text-sm" *ngIf="listaVaziaSemFiltros && !ambienteDesenvolvimento">
+        Comece cadastrando seu primeiro cliente.
+      </p>
+      <p class="m-0 text-sm" *ngIf="listaVaziaSemFiltros && ambienteDesenvolvimento">
+        Ambiente de desenvolvimento: você pode inserir rapidamente 3 clientes de teste para explorar a tela.
+      </p>
+      <div class="flex flex-column md:flex-row gap-2 mt-3">
+        <p-button
+          *ngIf="listaVaziaSemFiltros && !ambienteDesenvolvimento"
+          label="Cadastrar Cliente"
+          icon="pi pi-plus"
+          (onClick)="novoCliente()"
+          styleClass="p-button-success"
+        ></p-button>
+        <p-button
+          *ngIf="listaVaziaSemFiltros && ambienteDesenvolvimento"
+          label="Inserir 3 clientes de teste"
+          icon="pi pi-users"
+          (onClick)="inserirClientesTeste()"
+          styleClass="p-button-success"
+        ></p-button>
+      </div>
+    </div>
+
+    <!-- Lista Mobile (cards) -->
+    <div
+      *ngIf="!(carregando$ | async) && clientesFiltrados.length > 0"
+      class="flex flex-column gap-3 md:hidden"
+    >
+      <div
+        class="surface-card border-round shadow-1 p-3 flex flex-column gap-3"
+        *ngFor="let cliente of clientesFiltrados"
+      >
+        <div class="flex justify-content-between gap-3 align-items-start">
+          <div class="flex gap-3 flex-1 min-w-0">
+            <div class="flex align-items-center justify-content-center border-circle bg-primary text-white w-3rem h-3rem flex-shrink-0">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="flex flex-column gap-1 overflow-hidden">
+              <div class="flex align-items-center justify-content-between gap-2">
+                <h4 class="m-0 text-base font-semibold text-900 white-space-nowrap overflow-hidden text-overflow-ellipsis">
+                  {{ cliente.nome }}
+                </h4>
+              </div>
+              <p-tag
+                [value]="clienteStatusEnum.texto(cliente.ativo)"
+                [severity]="clienteStatusEnum.severidade(cliente.ativo)"
+                [rounded]="true"
+              ></p-tag>
+            </div>
+          </div>
+          <div class="flex gap-2 align-items-start">
+            <p-button
+              label="Editar"
+              icon="pi pi-pencil"
+              severity="info"
+              (onClick)="editarCliente(cliente)"
+              pTooltip="Editar"
+              tooltipPosition="top"
+            ></p-button>
+            <p-button
+              label="Excluir"
+              icon="pi pi-trash"
+              severity="danger"
+              (onClick)="confirmarExclusao(cliente)"
+              pTooltip="Excluir"
+              tooltipPosition="top"
+            ></p-button>
+          </div>
+        </div>
+
+        <div class="grid text-sm">
+          <div class="col-12 sm:col-6 flex flex-column gap-1">
+            <span class="text-500 flex align-items-center gap-2">
+              <i class="pi pi-id-card text-xs"></i> CPF
+            </span>
+            <span [appCpfFormat]="cliente.cpf"></span>
+          </div>
+          <div class="col-12 sm:col-6 flex flex-column gap-1">
+            <span class="text-500 flex align-items-center gap-2">
+              <i class="pi pi-phone text-xs"></i> Telefone
+            </span>
+            <span [appTelefoneFormat]="cliente.telefone"></span>
+          </div>
+          <div class="col-12 flex flex-column gap-1">
+            <span class="text-500 flex align-items-center gap-2">
+              <i class="pi pi-envelope text-xs"></i> Email
+            </span>
+            <span>{{ cliente.email }}</span>
+          </div>
+          <div class="col-12 flex flex-column gap-1">
+            <span class="text-500 flex align-items-center gap-2">
+              <i class="pi pi-map-marker text-xs"></i> Endereço
+            </span>
+            <span>
+              {{ cliente.endereco.logradouro }}, {{ cliente.endereco.numero }} - {{ cliente.endereco.bairro }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista Desktop (tabela) -->
+    <div
+      *ngIf="!(carregando$ | async) && clientesFiltrados.length > 0"
+      class="hidden md:block flex-auto"
+    >
+      <p-table
+        [value]="clientesFiltrados"
+        [scrollable]="true"
+        scrollHeight="flex"
+        [paginator]="false"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-striped"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Cliente</th>
+            <th>CPF</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Status</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-cliente>
+          <tr (click)="onLinhaClienteClick(cliente)" class="cursor-pointer">
+            <td>
+              <div class="flex align-items-center gap-2">
+                <div class="flex align-items-center justify-content-center border-circle bg-primary text-white w-2rem h-2rem flex-shrink-0">
+                  <i class="pi pi-user text-sm"></i>
+                </div>
+                <div class="flex flex-column gap-1">
+                  <span class="font-semibold text-900">{{ cliente.nome }}</span>
+                  <span class="text-500 text-xs">
+                    {{ cliente.endereco.cidade }}, {{ cliente.endereco.estado }}
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td><span [appCpfFormat]="cliente.cpf"></span></td>
+            <td>{{ cliente.email }}</td>
+            <td><span [appTelefoneFormat]="cliente.telefone"></span></td>
+            <td>
+              <p-tag
+                [value]="clienteStatusEnum.texto(cliente.ativo)"
+                [severity]="clienteStatusEnum.severidade(cliente.ativo)"
+                [rounded]="true"
+              ></p-tag>
+            </td>
+            <td class="text-center">
+              <div class="flex justify-content-center gap-2">
+                <p-button
+                  icon="pi pi-pencil"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="info"
+                  (onClick)="editarCliente(cliente)"
+                  (click)="$event.stopPropagation()"
+                  pTooltip="Editar"
+                  tooltipPosition="top"
+                ></p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="danger"
+                  (onClick)="confirmarExclusao(cliente)"
+                  (click)="$event.stopPropagation()"
+                  pTooltip="Excluir"
+                  tooltipPosition="top"
+                ></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
