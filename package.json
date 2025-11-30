@@ -1,0 +1,24 @@
+{
+  "name": "teste-pge",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "ng serve --host 0.0.0.0 --port 4200 --proxy-config proxy.conf.json",
+    "start:json": "json-server json-server/db.json --config json-server/server.json",
+    "start:dev:local": "concurrently \"npm run start\" \"npm run start:json\"",
+    "build": "ng build"
+  },
+  "dependencies": {
+    "@angular/core": "^19.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/platform-browser": "^19.0.0",
+    "@angular/router": "^19.0.0",
+    "primeng": "^19.0.0",
+    "@primeng/themes": "^19.0.0",
+    "primeicons": "^7.0.0",
+    "primeflex": "^4.0.0"
+  },
+  "devDependencies": {
+    "json-server": "^0.17.4",
+    "concurrently": "^9.0.0"
+  }
+}
