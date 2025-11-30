@@ -1,0 +1,70 @@
+name: Dev Release Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  tag-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Get Next Version
+        id: version
+        run: |
+          # Busca a última tag que segue o padrão v*
+          LAST_TAG=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || echo "v0.0.0")
+          echo "Last tag: $LAST_TAG"
+          
+          # Remove o 'v' inicial
+          VERSION=${LAST_TAG#v}
+          
+          # Separa em major, minor, patch (considerando que pode ter sufixo -SNAPSHOT ou não)
+          # Remove tudo após o primeiro hífen para pegar a base da versão limpa
+          BASE_VERSION=$(echo $VERSION | cut -d'-' -f1)
+          
+          IFS='.' read -r -a parts <<< "$BASE_VERSION"
+          MAJOR=${parts[0]}
+          MINOR=${parts[1]}
+          PATCH=${parts[2]}
+          
+          # Incrementa Patch
+          NEW_PATCH=$((PATCH + 1))
+          
+          # Define nova versão
+          NEW_TAG="v$MAJOR.$MINOR.$NEW_PATCH-SNAPSHOT"
+          echo "New tag: $NEW_TAG"
+          
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Create Tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const newTag = '${{ steps.version.outputs.new_tag }}';
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${newTag}`,
+                sha: context.sha
+              });
+              console.log(`Tag ${newTag} created successfully`);
+            } catch (error) {
+              console.log(`Error creating tag: ${error.message}`);
+              // Não falha o build se a tag já existir (em caso de retry rápido)
+            }
+

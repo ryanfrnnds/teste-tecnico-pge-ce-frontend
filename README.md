@@ -19,6 +19,7 @@ O objetivo é oferecer um ambiente totalmente funcional e padronizado, executáv
 - [🐳 Por que Docker?](#-por-que-usar-docker)
 - [🌐 Proxy & CORS](#-proxy-de-desenvolvimento-cors-resolvido-no-angular)
 - [📂 Estrutura de Arquivos](#-estrutura-do-projeto)
+- [🔄 CI/CD & Versionamento](#-cicd--versionamento)
 
 ---
 
@@ -117,6 +118,24 @@ teste-pge/
 ├── docker-compose.dev.yml
 └── README.md
 ```
+
+---
+
+# 🔄 CI/CD & Versionamento
+
+O projeto conta com um pipeline automatizado via **GitHub Actions** configurado para a branch `dev`.
+
+### Estratégia de Tags (Simulação)
+Como estamos simulando um ambiente de desenvolvimento contínuo, adotamos a seguinte estratégia para controle de histórico:
+
+1.  **Branch Principal:** `dev`
+2.  **Automação:** A cada **push** na branch `dev`, o workflow:
+    *   Calcula a próxima versão baseada na última tag (SemVer).
+    *   Incrementa o *Patch Version*.
+    *   Adiciona o sufixo `-SNAPSHOT`.
+    *   Gera uma **Tag Git** automaticamente (ex: `v0.0.4-SNAPSHOT`).
+
+> ℹ️ **Nota:** Em um cenário real corporativo, este fluxo seria complementado por Pull Requests, Code Reviews e branches estáveis (`main`/`master`) gerando versões de release sem o sufixo snapshot. Aqui, o foco é demonstrar a automação e organização do histórico.
 
 ---
 
