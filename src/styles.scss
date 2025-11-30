@@ -1,6 +1,96 @@
-/* Styles Globais */
+@use './assets/themes/design-tokens.scss' as *;
+@use './assets/styles/utilities.scss' as *;
+@use './assets/primeng/toast.scss';
+@use 'primeflex/primeflex.scss' as *;
+
+/* === Reset Global === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-family);
+  font-family: var(--pge-font-family-base);
+  font-size: var(--pge-font-size-base);
+  line-height: var(--pge-line-height-normal);
+  color: var(--pge-neutral-900);
+  background-color: var(--pge-neutral-50);
 }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--pge-font-family-headings);
+  font-weight: var(--pge-font-weight-semibold);
+  line-height: var(--pge-line-height-tight);
+  margin-bottom: var(--pge-spacing-md);
+  color: var(--pge-neutral-900);
+}
+
+h1 {
+  font-size: var(--pge-font-size-4xl);
+}
+
+h2 {
+  font-size: var(--pge-font-size-3xl);
+}
+
+h3 {
+  font-size: var(--pge-font-size-2xl);
+}
+
+h4 {
+  font-size: var(--pge-font-size-xl);
+}
+
+h5 {
+  font-size: var(--pge-font-size-lg);
+}
+
+h6 {
+  font-size: var(--pge-font-size-base);
+}
+
+/* === Links === */
+a {
+  color: var(--pge-primary-green);
+  text-decoration: none;
+  transition: color var(--pge-transition-fast);
+
+  &:hover {
+    color: var(--pge-primary-green-dark);
+    text-decoration: underline;
+  }
+}
+
+/* === Scrollbar Customizada === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--pge-neutral-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pge-neutral-400);
+  border-radius: var(--pge-border-radius-full);
+
+  &:hover {
+    background: var(--pge-neutral-500);
+  }
+}
+
