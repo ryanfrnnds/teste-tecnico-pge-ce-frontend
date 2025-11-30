@@ -11,6 +11,7 @@ O objetivo é oferecer um ambiente totalmente funcional e padronizado, executáv
 - [⚡ Quick Start](#-quick-start)
 - [🚀 Objetivos do Projeto](#-objetivos-do-projeto)
 - [🚧 Status do Projeto](#-status-do-projeto)
+- [📋 Funcionalidades Implementadas](FUNCIONALIDADES.md)
 - [📄 Referências (PDF)](#-referências)
 - [🧱 Tecnologias Utilizadas](#-tecnologias-utilizadas)
 - [🔥 Como Iniciar (Desenvolvimento)](#-ambiente-de-desenvolvimento-hot-reload-via-docker)
@@ -36,7 +37,7 @@ O objetivo é oferecer um ambiente totalmente funcional e padronizado, executáv
 # Windows
 ./scripts/powershell/start.ps1
 
-# Linux/Mac
+# Linux/Mac/Bash/ GitBash
 ./scripts/bash/start.sh
 ```
 
@@ -50,7 +51,7 @@ O objetivo é oferecer um ambiente totalmente funcional e padronizado, executáv
 # Windows
 ./scripts/powershell/test.ps1
 
-# Linux/Mac
+# Linux/Mac/Bash/ GitBash
 ./scripts/bash/test.sh
 ```
 
@@ -72,10 +73,18 @@ Configuramos o `tsconfig.json` para utilizar atalhos de importação (`@models`,
 ### 2. Estrutura de Pastas (Core & Pages)
 Adotamos uma estrutura que separa claramente responsabilidades globais de responsabilidades de apresentação:
 
-*   **`src/app/core/`**: Contém singletons, serviços globais, modelos de domínio compartilhados e interceptadores. É o coração da aplicação.
-    *   *Exemplo:* `ClienteService` (comunicação com API), `LoggerService`, `LogOperation` (Decorator).
+*   **`src/app/core/`**: Contém singletons, serviços globais, modelos de domínio compartilhados e interceptores. É o coração da aplicação.
+    *   *Exemplo:* `ClienteService` (comunicação com API), `LoggerService`, `LoadingService`, `LogOperation` (Decorator), `LoadingInterceptor`.
 *   **`src/app/pages/`**: Contém os componentes de página (roteáveis). Cada subpasta representa uma feature/tela do sistema.
     *   *Exemplo:* `clientes/lista-clientes` (Componente de apresentação).
+
+### 3. Loading Global Inteligente
+Implementamos um sistema de loading global que gerencia automaticamente o estado de carregamento:
+
+*   **`LoadingService`**: Serviço singleton que controla o estado global de loading através de BehaviorSubjects.
+*   **`LoadingInterceptor`**: Interceptor HTTP que empilha requisições automaticamente, ativando/desativando loading conforme necessário.
+*   **Empilhamento Inteligente**: Gerencia múltiplas requisições simultâneas, só desativando loading quando todas terminarem.
+*   **Performance Otimizada**: Só controla loading para requisições `/api`, evitando interferência com assets estáticos.
 
 *   **Decisão:** Essa separação evita acoplamento e deixa claro onde cada tipo de código deve residir. "Se é lógica de negócio/API, vai no Core. Se é tela, vai em Pages".
 
@@ -442,6 +451,14 @@ Para consultar os requisitos completos do teste, acesse o arquivo PDF incluso no
 
 ---
 
+# 📋 Funcionalidades Implementadas
+
+Para detalhes completos sobre as funcionalidades implementadas, arquitetura e decisões técnicas, consulte o documento dedicado:
+
+📖 **[FUNCIONALIDADES.md](FUNCIONALIDADES.md)** - Documentação detalhada das funcionalidades, arquitetura e implementação
+
+---
+
 # 🧪 Estratégia de Testes
 
 O projeto adota uma abordagem de testes automatizados focada na confiabilidade dos fluxos principais.
@@ -451,12 +468,13 @@ O projeto adota uma abordagem de testes automatizados focada na confiabilidade d
 | Camada | Arquivo | O que é testado? |
 |--------|---------|------------------|
 | **Core / Service** | `core/services/cliente.service.spec.ts` | Validação completa do CRUD, verificação de URLs, métodos HTTP (GET/POST/PUT/DELETE) e integração com o sistema de Logs. |
+| **Pages / Component** | `pages/clientes/lista-clientes/lista-clientes.component.spec.ts` | **✅ COMPLETA** - Validação abrangente do componente de listagem: carregamento inicial, filtros avançados (busca múltipla + status), paginação com estado preservado, exclusão com modal de confirmação, navegação com query params, métodos utilitários (formatação CPF/telefone/status) e tratamento robusto de erros. |
 | **Decorator** | (Via Service) | O teste do Service valida indiretamente se o decorator `@LogOperation` está interceptando as chamadas e registrando os logs corretamente no `LoggerService`. |
 
 ### 🎯 Próximos Testes (Planejados)
 
-*   **Componente de Listagem:** Validar renderização da tabela PrimeNG e comportamento de filtros.
-*   **Componente de Formulário:** Validar estados do Reactive Forms (invalid/valid) e mensagens de erro.
+*   **Componente de Formulário:** Validar estados do Reactive Forms (invalid/valid), máscaras de entrada e mensagens de erro.
+*   **Integração E2E:** Testes end-to-end com Cypress para fluxos completos de usuário (cadastro → listagem → edição → exclusão).
 
 > **Para rodar os testes via Docker (Recomendado):**
 > ```bash
