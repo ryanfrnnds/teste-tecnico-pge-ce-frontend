@@ -1,0 +1,30 @@
+<p-dialog 
+  [(visible)]="visible" 
+  [modal]="true" 
+  [style]="{ width: '450px' }" 
+  [header]="title" 
+  (onHide)="close()"
+  styleClass="p-fluid"
+>
+  <div class="confirmation-content">
+    <i [class]="icon" class="confirmation-icon" [ngClass]="'text-' + severity"></i>
+    <span class="confirmation-message">{{ message }}</span>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancelar" 
+      icon="pi pi-times" 
+      [text]="true" 
+      severity="secondary" 
+      (onClick)="onCancel()"
+    ></p-button>
+    <p-button
+      label="Confirmar"
+      icon="pi pi-check"
+      [severity]="severity || 'danger'"
+      (onClick)="onConfirm()"
+      [autofocus]="true"
+    ></p-button>
+  </ng-template>
+</p-dialog>

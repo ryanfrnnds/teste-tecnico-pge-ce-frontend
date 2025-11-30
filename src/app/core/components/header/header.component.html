@@ -1,0 +1,53 @@
+<header class="pge-header">
+  <div class="container-fluid">
+    <div class="header-content">
+      <div class="branding">
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="pi pi-shield"></i>
+          </div>
+          <div class="logo-text">
+            <h1 class="app-title">{{ appTitle }}</h1>
+            <span class="app-subtitle">{{ appSubtitle }}</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="main-nav desktop-nav">
+        <a routerLink="/clientes" routerLinkActive="active" class="nav-link">
+          <i class="pi pi-users"></i>
+          <span>Clientes</span>
+        </a>
+        <a routerLink="/logs" routerLinkActive="active" class="nav-link">
+          <i class="pi pi-history"></i>
+          <span>Logs</span>
+        </a>
+      </nav>
+
+      <div class="header-actions">
+        <button
+          pButton
+          type="button"
+          class="theme-toggle-btn p-button-rounded p-button-text p-button-secondary"
+          [icon]="temaAtual === 'dark' ? 'pi pi-sun' : 'pi pi-moon'"
+          [attr.aria-label]="temaAtual === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'"
+          (click)="alternarTema()">
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Navegação tipo "tabs" para mobile (flutuando entre header e conteúdo) -->
+<nav class="smart-tabs mobile-nav">
+  <a routerLink="/clientes" routerLinkActive="active" class="tab-link">
+    <i class="pi pi-users"></i>
+    <span>Clientes</span>
+  </a>
+  <a routerLink="/logs" routerLinkActive="active" class="tab-link">
+    <i class="pi pi-history"></i>
+    <span>Logs</span>
+  </a>
+</nav>
+
+

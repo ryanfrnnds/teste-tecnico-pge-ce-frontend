@@ -1,0 +1,39 @@
+.confirmation-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--pge-spacing-md);
+    padding: var(--pge-spacing-md) 0;
+}
+
+.confirmation-icon {
+    font-size: 2rem;
+}
+
+.confirmation-message {
+    font-size: var(--pge-font-size-base);
+    color: var(--pge-neutral-800);
+}
+
+/* Cores baseadas na severidade (usando classes utilitárias do PrimeNG ou custom) */
+.text-danger {
+    color: var(--pge-feedback-error);
+}
+
+.text-warning {
+    color: var(--pge-feedback-warning);
+}
+
+.text-info {
+    color: var(--pge-feedback-info);
+}
+
+.text-success {
+    color: var(--pge-feedback-success);
+}
+
+:host ::ng-deep .p-dialog .p-dialog-footer .p-button.p-focus {
+    box-shadow: 0 0 0 2px rgba(0, 170, 51, 0.35);
+    border-color: var(--pge-primary-green);
+    transform: translateY(-1px);
+}
