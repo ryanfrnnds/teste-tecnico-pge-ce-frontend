@@ -1,0 +1,27 @@
+services:
+  frontend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      # Expõe a porta do Karma para visualização da interface de testes no browser
+      - "9876:9876"
+    volumes:
+      - .:/app
+      - node_modules_test:/app/node_modules
+    depends_on:
+      - json-server-test
+    # Modo watch permite re-executar testes automaticamente
+    command: npm run test -- --browsers=ChromeHeadlessNoSandbox --progress=false
+
+  json-server-test:
+    build:
+      context: ./json-server
+      dockerfile: Dockerfile
+    volumes:
+      # Usa banco de dados SEPARADO do ambiente de desenvolvimento
+      - ./json-server/db.test.json:/app/db.json
+    # Não expõe a porta 3000 externamente para evitar conflitos
+
+volumes:
+  node_modules_test:
