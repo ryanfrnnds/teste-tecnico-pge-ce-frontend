@@ -1,22 +1,4 @@
 {
-  "clientes": [
-    {
-      "id": "1",
-      "nome": "João da Silva",
-      "cpf": "123.456.789-00",
-      "email": "joao@exemplo.com",
-      "telefone": "(85) 99999-9999",
-      "endereco": {
-        "cep": "60000-000",
-        "logradouro": "Rua Exemplo",
-        "numero": "123",
-        "complemento": "Apto 101",
-        "bairro": "Centro",
-        "cidade": "Fortaleza",
-        "estado": "CE"
-      },
-      "ativo": true
-    }
-  ],
+  "clientes": [],
   "logs": []
 }
