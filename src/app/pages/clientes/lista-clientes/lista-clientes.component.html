@@ -1,0 +1,38 @@
+<div class="card">
+  <p-table [value]="clientes" [loading]="carregando" [tableStyle]="{ 'min-width': '50rem' }">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nome</th>
+        <th>CPF</th>
+        <th>Email</th>
+        <th>Telefone</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-cliente>
+      <tr>
+        <td>{{ cliente.nome }}</td>
+        <td>{{ cliente.cpf }}</td>
+        <td>{{ cliente.email }}</td>
+        <td>{{ cliente.telefone }}</td>
+        <td>
+          <p-tag 
+            [value]="cliente.ativo ? 'Ativo' : 'Inativo'" 
+            [severity]="getSeveridadeStatus(cliente.ativo)">
+          </p-tag>
+        </td>
+        <td>
+          <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"></p-button>
+          <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"></p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="text-center">Nenhum cliente encontrado.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
