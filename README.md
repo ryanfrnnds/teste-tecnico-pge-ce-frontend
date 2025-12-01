@@ -8,23 +8,21 @@ O objetivo é oferecer um ambiente totalmente funcional e padronizado, executáv
 
 ## 📑 Índice
 
-- [⚡ Quick Start](#-quick-start)
-- [🚀 Objetivos do Projeto](#-objetivos-do-projeto)
-- [🚧 Status do Projeto](#-status-do-projeto)
-- [📋 Funcionalidades Implementadas](FUNCIONALIDADES.md)
-- [📄 Referências (PDF)](#-referências)
-- [🧱 Tecnologias Utilizadas](#-tecnologias-utilizadas)
-- [🔥 Como Iniciar (Desenvolvimento)](#-ambiente-de-desenvolvimento-hot-reload-via-docker)
-- [🌐 Acessando a Aplicação](#-acessando-a-aplicação-no-browser)
-- [🛠️ Scripts Facilitadores](#scripts-facilitadores-atalhos)
-- [🏭 Produção / Build](#-ambiente-de-produção--build)
-- [🧩 Sobre o PrimeFlex](#-sobre-a-escolha-do-primeflex-importante)
-- [🐳 Por que Docker?](#-por-que-usar-docker)
-- [🌐 Proxy & CORS](#-proxy-de-desenvolvimento-cors-resolvido-no-angular)
-- [⚠️ Persistência de Dados](#persistência-de-dados-importante)
-- [📂 Estrutura de Arquivos](#-estrutura-do-projeto)
+- [⚡ Quick Start (Docker)](#-quick-start-docker)
+- [📄 Sobre o Desafio](#-sobre-o-desafio)
+- [🚧 Status Geral do Projeto](#-status-geral-do-projeto)
+- [📊 Resumo Requisitos x Implementação](#-resumo-requisitos-x-implementação)
+- [📚 Documentação Detalhada](#-documentação-detalhada)
+- [🧱 Tecnologias Utilizadas](#-tecnologias-utilizadas-resumo)
+- [🔥 Ambiente de Desenvolvimento (Hot Reload via Docker)](#-ambiente-de-desenvolvimento-hot-reload-via-docker)
+- [🌐 Acessando a Aplicação no Browser](#-acessando-a-aplicação-no-browser)
+- [🐳 Por que usar Docker?](#-por-que-usar-docker)
+- [📂 Estrutura do Projeto](#-estrutura-do-projeto)
 - [🔄 CI/CD & Versionamento](#-cicd--versionamento)
-- [🏛️ Arquitetura & Decisões](#arquitetura--decisões-técnicas)
+- [🌐 Proxy de Desenvolvimento (CORS resolvido no Angular)](#-proxy-de-desenvolvimento-cors-resolvido-no-angular)
+- [⚠️ Persistência de Dados](#persistência-de-dados-importante)
+- [🏛️ Arquitetura & Decisões Técnicas (Resumo)](#-arquitetura--decisões-técnicas-resumo)
+- [🧩 Sobre a escolha do PrimeFlex (IMPORTANTE)](#-sobre-a-escolha-do-primeflex-importante)
 - [🧪 Estratégia de Testes](#-estratégia-de-testes)
 
 ---
@@ -128,20 +126,11 @@ Resumo condensado do comparativo detalhado entre o PDF do desafio e o estado atu
 
 Para não poluir o `README` com muitos detalhes de implementação, a documentação foi organizada na pasta `documentacao/`:
 
-- **[documentacao/AMBIENTE_E_EXECUCAO.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/AMBIENTE_E_EXECUCAO.md)**  
-  Detalhes de ambientes (dev/test/prod), Docker, scripts, proxy e persistência.
-
-- **[documentacao/ARQUITETURA_DECISOES.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/ARQUITETURA_DECISOES.md)**  
-  Arquitetura, estrutura de pastas (`core`/`pages`), loading global, decorator de logs, Docker-first.
-
-- **[documentacao/ESTRATEGIA_TESTES.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/ESTRATEGIA_TESTES.md)**  
-  Estratégia de testes, cenário atual e próximos passos.
-
-- **[documentacao/FUNCIONALIDADES.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/FUNCIONALIDADES.md)**  
-  Funcionalidades já implementadas (lista de clientes, infra, temas, etc.).
-
-- **[documentacao/COMPARATIVO_REQUISITOS.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/COMPARATIVO_REQUISITOS.md)**  
-  Comparativo detalhado requisito a requisito entre o PDF e a implementação atual.
+- [Ambiente & Execução](documentacao/AMBIENTE_E_EXECUCAO.md)
+- [Arquitetura & Decisões Técnicas](documentacao/ARQUITETURA_DECISOES.md)
+- [Estratégia de Testes](documentacao/ESTRATEGIA_TESTES.md)
+- [Funcionalidades Implementadas](documentacao/FUNCIONALIDADES.md)
+- [Comparativo Requisitos x Implementação](documentacao/COMPARATIVO_REQUISITOS.md)
 
 ---
 
