@@ -1,3 +1,32 @@
 /* Layout e responsividade desta página são definidos apenas com PrimeFlex e estilos dos componentes PrimeNG. */
 
+.lista-clientes-page {
+  min-height: 0;
+  flex: 1;
 
+  .p-toolbar {
+    margin-bottom: 0;
+  }
+
+  .grid {
+    margin: 0;
+  }
+
+  .col-12,
+  .col-6,
+  .lg\\:col-4,
+  .lg\\:col-3,
+  .lg\\:col-2 {
+    min-height: 0;
+  }
+
+  ::ng-deep .p-float-label .p-inputtext,
+  ::ng-deep .p-float-label .p-dropdown,
+  ::ng-deep .p-float-label .p-calendar {
+    min-height: 3rem;
+  }
+
+  ::ng-deep .p-float-label .p-dropdown .p-dropdown-label {
+    line-height: 3rem;
+  }
+}

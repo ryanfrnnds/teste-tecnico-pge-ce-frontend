@@ -10,7 +10,7 @@ import { ToastModule } from 'primeng/toast';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -43,7 +43,7 @@ import { ClienteStatusEnum } from '@core/enum/cliente-status.enum';
     IconFieldModule,
     InputIconModule,
     SelectButtonModule,
-    DropdownModule,
+    SelectModule,
     SkeletonModule,
     TooltipModule,
     FloatLabelModule,
@@ -217,6 +217,17 @@ export class ListaClientesComponent implements OnInit {
     this.filtroTelefone = valores.telefone || null;
     this.filtroStatus = valores.status || 'todos';
     this.aplicarFiltros(true);
+  }
+
+  limparFiltros(): void {
+    this.filtrosForm.reset({
+      nome: '',
+      cpf: '',
+      email: '',
+      telefone: '',
+      status: 'todos'
+    });
+    this.aoPesquisar();
   }
 
   confirmarExclusao(cliente: Cliente): void {
