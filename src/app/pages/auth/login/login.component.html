@@ -1,0 +1,75 @@
+<div class="login-page flex align-items-center justify-content-center min-h-screen p-3">
+  <div class="login-card surface-card shadow-2 border-round p-4">
+    <div class="login-header flex align-items-center gap-3 mb-4">
+      <div class="login-icon flex align-items-center justify-content-center border-circle bg-primary text-white">
+        <i class="pi pi-shield"></i>
+      </div>
+      <div>
+        <h2 class="m-0 text-xl font-semibold">Entrar</h2>
+        <p class="m-0 text-sm text-color-secondary">Acesso ao sistema de gestão de clientes</p>
+      </div>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="grid formgrid p-fluid gap-3">
+        <div class="col-12">
+          <p-floatLabel variant="on">
+            <input
+              pInputText
+              id="username"
+              type="text"
+              class="w-full h-3rem"
+              formControlName="username"
+              autocomplete="username"
+              required
+            />
+            <label for="username">Usuário</label>
+          </p-floatLabel>
+          <small
+            *ngIf="loginForm.controls.username.invalid && (loginForm.controls.username.dirty || loginForm.controls.username.touched)"
+            class="p-error mt-1 block text-sm"
+          >
+            Usuário obrigatório
+          </small>
+        </div>
+
+        <div class="col-12">
+          <p-floatLabel variant="on" class="w-full">
+            <p-password
+              id="password"
+              formControlName="password"
+              class="w-full"
+              inputStyleClass="w-full h-3rem"
+              feedback="false"
+              toggleMask="true"
+              required
+            ></p-password>
+            <label for="password">Senha</label>
+          </p-floatLabel>
+          <small
+            *ngIf="loginForm.controls.password.invalid && (loginForm.controls.password.dirty || loginForm.controls.password.touched)"
+            class="p-error mt-1 block text-sm"
+          >
+            Senha obrigatória
+          </small>
+        </div>
+
+        <div class="col-12 flex flex-column gap-2 mt-3">
+          <small class="text-color-muted">
+            Usuário padrão: <strong>admin</strong> / senha <strong>admin</strong>
+          </small>
+          <div class="flex justify-content-end">
+            <p-button
+              type="submit"
+              label="Entrar"
+              icon="pi pi-sign-in"
+              [loading]="submitting"
+              [disabled]="submitting || loginForm.invalid"
+            ></p-button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

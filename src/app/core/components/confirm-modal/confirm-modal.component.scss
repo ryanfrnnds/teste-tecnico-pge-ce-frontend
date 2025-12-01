@@ -31,9 +31,3 @@
 .text-success {
     color: var(--pge-feedback-success);
 }
-
-:host ::ng-deep .p-dialog .p-dialog-footer .p-button.p-focus {
-    box-shadow: 0 0 0 2px rgba(0, 170, 51, 0.35);
-    border-color: var(--pge-primary-green);
-    transform: translateY(-1px);
-}

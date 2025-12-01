@@ -1,53 +1,87 @@
 <header class="pge-header">
-  <div class="container-fluid">
-    <div class="header-content">
-      <div class="branding">
-        <div class="logo">
-          <div class="logo-icon">
-            <i class="pi pi-shield"></i>
-          </div>
-          <div class="logo-text">
-            <h1 class="app-title">{{ appTitle }}</h1>
-            <span class="app-subtitle">{{ appSubtitle }}</span>
-          </div>
+  <div class="w-full px-3 py-2 flex align-items-center justify-content-between gap-3">
+    <!-- Título (sem logo) -->
+    <div class="flex flex-column">
+      <h1 class="m-0 text-lg font-semibold text-white">{{ appTitle }}</h1>
+      <span class="text-xs text-white-alpha-90 text-uppercase tracking-widest">
+        {{ appSubtitle }}
+      </span>
+    </div>
+
+    <!-- Ações: tema + usuário -->
+    <div class="flex align-items-center gap-2 ml-auto">
+      <button
+        pButton
+        type="button"
+        class="pge-header-theme-toggle p-button-rounded p-button-text"
+        [icon]="temaAtual === 'dark' ? 'pi pi-sun' : 'pi pi-moon'"
+        [attr.aria-label]="temaAtual === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'"
+        (click)="alternarTema()"
+      ></button>
+
+      <ng-container *ngIf="usuario$ | async as usuario; else guest">
+        <!-- Desktop: nome + botão sair -->
+        <div class="hidden md:flex align-items-center gap-2 text-white text-sm font-medium">
+          <i class="pi pi-user text-sm"></i>
+          <span>{{ usuario.name }}</span>
+          <button
+            pButton
+            type="button"
+            class="p-button-rounded p-button-text p-button-plain"
+            icon="pi pi-sign-out"
+            label="Sair"
+            (click)="logout()"
+          ></button>
         </div>
-      </div>
 
-      <nav class="main-nav desktop-nav">
-        <a routerLink="/clientes" routerLinkActive="active" class="nav-link">
-          <i class="pi pi-users"></i>
-          <span>Clientes</span>
-        </a>
-        <a routerLink="/logs" routerLinkActive="active" class="nav-link">
-          <i class="pi pi-history"></i>
-          <span>Logs</span>
-        </a>
-      </nav>
+        <!-- Mobile: menu de usuário -->
+        <div class="flex md:hidden align-items-center">
+          <p-menu #userMenu [popup]="true" [model]="userMenuItems"></p-menu>
+          <button
+            pButton
+            type="button"
+            class="p-button-rounded p-button-text p-button-plain"
+            icon="pi pi-user"
+            (click)="userMenu.toggle($event)"
+          ></button>
+        </div>
+      </ng-container>
 
-      <div class="header-actions">
-        <button
+      <ng-template #guest>
+        <a
           pButton
           type="button"
-          class="theme-toggle-btn p-button-rounded p-button-text p-button-secondary"
-          [icon]="temaAtual === 'dark' ? 'pi pi-sun' : 'pi pi-moon'"
-          [attr.aria-label]="temaAtual === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'"
-          (click)="alternarTema()">
-        </button>
-      </div>
+          class="p-button-text p-button-plain flex align-items-center gap-2 text-white"
+          routerLink="/login"
+        >
+          <i class="pi pi-sign-in"></i>
+          <span>Entrar</span>
+        </a>
+      </ng-template>
     </div>
   </div>
 </header>
 
-<!-- Navegação tipo "tabs" para mobile (flutuando entre header e conteúdo) -->
-<nav class="smart-tabs mobile-nav">
-  <a routerLink="/clientes" routerLinkActive="active" class="tab-link">
-    <i class="pi pi-users"></i>
-    <span>Clientes</span>
-  </a>
-  <a routerLink="/logs" routerLinkActive="active" class="tab-link">
-    <i class="pi pi-history"></i>
-    <span>Logs</span>
-  </a>
+<!-- Navegação tipo "tabs" flutuando entre header e conteúdo -->
+<nav class="pge-header-mobile-tabs flex justify-content-center gap-2 py-2 surface-ground">
+  <div class="flex justify-content-center gap-2">
+    <a
+      routerLink="/clientes"
+      routerLinkActive="active"
+      class="pge-header-tab-link"
+    >
+      <i class="pi pi-users"></i>
+      <span>Clientes</span>
+    </a>
+    <a
+      routerLink="/logs"
+      routerLinkActive="active"
+      class="pge-header-tab-link"
+    >
+      <i class="pi pi-history"></i>
+      <span>Logs</span>
+    </a>
+  </div>
 </nav>
 
 

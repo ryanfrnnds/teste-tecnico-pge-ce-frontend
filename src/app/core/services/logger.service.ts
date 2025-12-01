@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ export class LoggerService {
 
   static instance: LoggerService;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private authService: AuthService) {
     LoggerService.instance = this;
   }
 
@@ -18,9 +19,9 @@ export class LoggerService {
       data: new Date().toISOString(),
       acao,
       mensagem,
-      usuario: 'system'
+      usuario: this.authService.usuario?.username ?? 'system'
     };
-    
+
     this.http.post(this.logsUrl, log).subscribe({
       error: (err) => console.error('Falha ao registrar log', err)
     });

@@ -1,32 +1,123 @@
 /* Layout e responsividade desta página são definidos apenas com PrimeFlex e estilos dos componentes PrimeNG. */
 
 .lista-clientes-page {
-  min-height: 0;
-  flex: 1;
-
-  .p-toolbar {
-    margin-bottom: 0;
+  .desktop-table-container {
+    margin-bottom: var(--pge-spacing-lg);
   }
 
-  .grid {
-    margin: 0;
+  /* Destaque visual para a única opção encontrada no autocomplete */
+  ::ng-deep .autocomplete-item {
+    padding: 0.35rem 0.75rem;
   }
 
-  .col-12,
-  .col-6,
-  .lg\\:col-4,
-  .lg\\:col-3,
-  .lg\\:col-2 {
-    min-height: 0;
+  ::ng-deep .autocomplete-item--unique {
+    background-color: rgba(34, 197, 94, 0.15); /* verde suave */
+    border-radius: 0.5rem;
+    animation: unique-option-pulse 1.2s ease-in-out infinite alternate;
   }
 
-  ::ng-deep .p-float-label .p-inputtext,
-  ::ng-deep .p-float-label .p-dropdown,
-  ::ng-deep .p-float-label .p-calendar {
-    min-height: 3rem;
+  @keyframes unique-option-pulse {
+    from {
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.0);
+    }
+    to {
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+    }
   }
 
-  ::ng-deep .p-float-label .p-dropdown .p-dropdown-label {
-    line-height: 3rem;
+  /* Proteção de dados sensíveis - tooltips */
+  .dados-sensiveis:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--pge-color-neutral-800);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-top: 0.25rem;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Ícones de filtro com badges elegantes */
+  .status-filter-icon {
+    position: relative;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: scale(1.05);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    &.active {
+      background-color: rgba(var(--primary-color-rgb), 0.1);
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(var(--primary-color-rgb), 0.15);
+      border-color: var(--primary-color);
+    }
+
+    i {
+      transition: all 0.2s ease;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      min-width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &.total-badge {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+      }
+
+      &.active-badge {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+
+      &.inactive-badge {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+    }
+  }
+
+  /* Tema escuro para badges */
+  .p-dark-theme .status-badge {
+    border-color: var(--surface-section);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 }

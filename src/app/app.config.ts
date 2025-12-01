@@ -8,6 +8,8 @@ import { PGETheme } from '../assets/themes/pge-theme';
 import { MessageService } from 'primeng/api';
 import { ConfirmationService } from 'primeng/api';
 import { LoadingInterceptor } from './core/interceptors/loading.interceptor';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { ComponentLoadingInterceptor } from './core/interceptors/component-loading.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +20,16 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: LoadingInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ComponentLoadingInterceptor,
       multi: true
     },
     provideAnimationsAsync(),
