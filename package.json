@@ -3,12 +3,15 @@
   "version": "0.0.1",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0 --port 4200 --proxy-config proxy.conf.json",
-    "start:json": "json-server json-server/db.json --config json-server/server.json",
-    "start:dev:local": "concurrently \"npm run start\" \"npm run start:json\"",
+    "start": "ng serve --host 0.0.0.0 --port 4200 --proxy-config proxy.conf.js",
+    "start:json": "node json-server/server.js",
+    "start:dev:local": "cross-env API_PROXY_HOST=localhost concurrently \"npm run start\" \"npm run start:json\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "e2e": "npm run cypress:run"
   },
   "private": true,
   "dependencies": {
@@ -43,6 +46,8 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "karma-spec-reporter": "^0.0.36",
-    "typescript": "~5.6.2"
+    "typescript": "~5.6.2",
+    "cross-env": "^7.0.3",
+    "cypress": "^13.15.0"
   }
 }

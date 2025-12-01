@@ -29,5 +29,14 @@
             "estado": "CE"
         }
     ],
-    "logs": []
+    "logs": [],
+    "users": [
+        {
+            "id": 1,
+            "username": "admin",
+            "password": "admin",
+            "name": "Administrador do Sistema",
+            "role": "admin"
+        }
+    ]
 }
