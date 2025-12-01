@@ -128,19 +128,19 @@ Resumo condensado do comparativo detalhado entre o PDF do desafio e o estado atu
 
 Para não poluir o `README` com muitos detalhes de implementação, a documentação foi organizada na pasta `documentacao/`:
 
-- **[documentacao/AMBIENTE_E_EXECUCAO.md](documentacao/AMBIENTE_E_EXECUCAO.md)**  
+- **[documentacao/AMBIENTE_E_EXECUCAO.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/AMBIENTE_E_EXECUCAO.md)**  
   Detalhes de ambientes (dev/test/prod), Docker, scripts, proxy e persistência.
 
-- **[documentacao/ARQUITETURA_DECISOES.md](documentacao/ARQUITETURA_DECISOES.md)**  
+- **[documentacao/ARQUITETURA_DECISOES.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/ARQUITETURA_DECISOES.md)**  
   Arquitetura, estrutura de pastas (`core`/`pages`), loading global, decorator de logs, Docker-first.
 
-- **[documentacao/ESTRATEGIA_TESTES.md](documentacao/ESTRATEGIA_TESTES.md)**  
+- **[documentacao/ESTRATEGIA_TESTES.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/ESTRATEGIA_TESTES.md)**  
   Estratégia de testes, cenário atual e próximos passos.
 
-- **[documentacao/FUNCIONALIDADES.md](documentacao/FUNCIONALIDADES.md)**  
+- **[documentacao/FUNCIONALIDADES.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/FUNCIONALIDADES.md)**  
   Funcionalidades já implementadas (lista de clientes, infra, temas, etc.).
 
-- **[documentacao/COMPARATIVO_REQUISITOS.md](documentacao/COMPARATIVO_REQUISITOS.md)**  
+- **[documentacao/COMPARATIVO_REQUISITOS.md](https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend/blob/dev/documentacao/COMPARATIVO_REQUISITOS.md)**  
   Comparativo detalhado requisito a requisito entre o PDF e a implementação atual.
 
 ---
