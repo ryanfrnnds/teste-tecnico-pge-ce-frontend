@@ -1,0 +1,13 @@
+/* Altura padrão dos campos com FloatLabel (input, dropdown, calendar) */
+
+::ng-deep .p-float-label .p-inputtext,
+::ng-deep .p-float-label .p-dropdown,
+::ng-deep .p-float-label .p-calendar {
+  min-height: 3rem;
+}
+
+::ng-deep .p-float-label .p-dropdown .p-dropdown-label {
+  line-height: 3rem;
+}
+
+

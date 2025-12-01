@@ -1,6 +1,9 @@
 @use './assets/themes/design-tokens.scss' as *;
 @use './assets/styles/utilities.scss' as *;
 @use './assets/primeng/toast.scss';
+@use './assets/primeng/layout.scss';
+@use './assets/primeng/form-field.scss';
+@use './assets/primeng/dialog.scss';
 @use 'primeflex/primeflex.scss' as *;
 
 /* === Reset Global === */

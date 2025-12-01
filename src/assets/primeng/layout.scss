@@ -1,0 +1,19 @@
+/* Overrides de layout para componentes PrimeNG usados em várias páginas */
+
+.p-toolbar {
+  margin-bottom: 0;
+}
+
+.grid {
+  margin: 0;
+}
+
+.col-12,
+.col-6,
+.lg\:col-4,
+.lg\:col-3,
+.lg\:col-2 {
+  min-height: 0;
+}
+
+
