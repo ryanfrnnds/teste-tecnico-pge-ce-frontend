@@ -187,8 +187,73 @@ A aplicação foi desenhada para rodar nativamente em Docker.
 ### 5. Execução de Testes em Container
 Para viabilizar a execução dos testes unitários dentro do Docker, foram necessárias duas adaptações específicas no `karma.conf.js`:
 
-1.  **ChromeHeadlessNoSandbox**: Criação de um *Custom Launcher* que adiciona a flag `--no-sandbox`. Isso é obrigatório para rodar o Chrome (Chromium) dentro de um container Alpine Linux como usuário root.
-2.  **Karma Spec Reporter**: Adição do plugin `karma-spec-reporter` para melhorar a visualização dos testes no console, já que o reporter padrão do Karma é minimalista demais para ambientes de CI/terminal.
+1. **ChromeHeadlessNoSandbox**: criação de um *Custom Launcher* que adiciona a flag `--no-sandbox`. Isso é obrigatório para rodar o Chrome (Chromium) dentro de um container Alpine Linux como usuário root.
+2. **Karma Spec Reporter**: adição do plugin `karma-spec-reporter` para melhorar a visualização dos testes no console, já que o reporter padrão do Karma é minimalista demais para ambientes de CI/terminal.
+
+---
+
+## 🏛️ Arquitetura & Decisões Técnicas (Resumo)
+
+- **Docker-first em todos os ambientes**: toda a experiência (dev, testes unitários e E2E, build de produção) foi desenhada para rodar dentro de containers:
+  - **dev**: `docker-compose.dev.yml` com Angular (`frontend-dev`) + `json-server`.
+  - **testes unitários (Karma)**: `docker-compose.test.yml` com `frontend-test` e `db.test.json`, incluindo Chrome headless customizado.
+  - **testes E2E (Cypress)**: `docker-compose.e2e.yml` com `frontend-e2e`, `json-server-test-e2e` e `cypress-e2e`, permitindo acompanhar a aplicação em `http://localhost:4200` enquanto o Cypress roda no container.
+  - **build de produção**: `Dockerfile` multi-stage que gera artefatos Angular e serve via Nginx.
+
+- **PrimeFlex usado apenas como acelerador de layout**:
+  - **Motivo**: ganhar velocidade na montagem das telas do teste e integrar melhor com PrimeNG.
+  - **Decisão de arquitetura**: o uso de PrimeFlex não é recomendado para projetos reais de longo prazo, pois está em processo de *sunset*; a recomendação seria Tailwind ou outro utilitário moderno (detalhado em [🧩 Sobre a escolha do PrimeFlex](#-sobre-a-escolha-do-primeflex-importante)).
+
+- **Logs desacoplados via Decorator**:
+  - Criamos um decorator `@LogOperation` em `core/decorators` para registrar operações em logs sem poluir os serviços com código de logging.
+  - **Benefício**: aplica um estilo de AOP (Programação Orientada a Aspectos), permitindo adicionar/remover logging em métodos críticos sem alterar a lógica de negócio.
+
+- **Loading global + loading por componente via interceptors/serviços**:
+  - **Loading global**:
+    - `LoadingService`: centraliza o estado global de requisições ativas e um `carregando$`.
+    - `LoadingInterceptor`: intercepta chamadas HTTP para `/api`, empilha/desempilha requisições e liga/desliga o loading global apenas quando todas terminam.
+  - **Loading de componente**:
+    - para cenários específicos de tela, usamos serviços/componentes de loading locais (ex.: skeletons) que reagem ao `LoadingService` ou a estados internos da store.
+  - **Decisão**: essa separação permite ter feedback global consistente (ex.: spinner geral) sem impedir componentes de terem seus próprios indicadores (como skeleton de tabela).
+
+- **Login minimalista, focado em demonstrar auditoria de ações**:
+  - O fluxo de autenticação (`/login`) foi implementado de forma simples (usuário `admin` / senha `admin`) para viabilizar dois cenários de log:
+    - **logs gerados pelo sistema** (`usuario: "system"`) quando ações ocorrem sem um usuário autenticado.
+    - **logs gerados pelo usuário** (`usuario` vindo do `AuthService.usuario`) quando o usuário está logado e realiza ações na lista de clientes.
+  - O objetivo não é ser um módulo de autenticação completo, mas sim demonstrar a integração entre Auth, `LogService`/`LoggerService` e a tela de auditoria.
+
+- **UX: minimizar cliques e fricção**:
+  - **Listagem de clientes**:
+    - foco em encontrar/filtrar clientes em poucos passos, com filtros principais (nome, cidade, status) sempre visíveis.
+    - cards mobile + tabela desktop, evitando navegações desnecessárias entre telas só para ver detalhes básicos.
+    - preservação de estado via **query params + sessionStorage**, permitindo:
+      - recarregar a página,
+      - navegar para outra rota e voltar,
+      - manter filtros e paginação.
+  - **Ações em massa** (exclusão / reativação):
+    - botões de ação em massa visíveis apenas quando fazem sentido (status ≠ `todos` e seleção > 0), reduzindo ruído visual.
+
+- **Reatividade com APIs nativas do Angular**:
+  - **Signals e `toSignal`**:
+    - stores de página (`ListaClientesStore`, `ListaLogsStore`) usam `signal`, `computed` e `effect` para gerenciar estado e derivar dados (paginador, listas filtradas).
+    - integração com RxJS feita por `toSignal`, mantendo o código reativo, mas ainda idiomático Angular 16+.
+  - **Reactive Forms**:
+    - filtros e login usam `FormBuilder`/`NonNullableFormBuilder` com validações declarativas.
+    - estados de formulário são conectados diretamente com query params e com as stores.
+  - **Resolvers, guards e interceptors**:
+    - resolvers (`clientesResolver`, `logsResolver`) carregam dados antes da ativação de rota.
+    - `authGuard` protege rotas de clientes/logs.
+    - interceptors cuidam de cross-cutting concerns (loading, auth header) sem acoplar isso às páginas.
+
+- **LGPD e tratamento de dados pessoais (na medida do escopo do teste)**:
+  - **Mascaras para dados sensíveis**:
+    - Pipes `maskCpf`, `maskPhone`, `maskEmail` exibem versões mascaradas de CPF, telefone e e-mail, reduzindo exposição desnecessária em tela.
+    - tooltip opcional revela o valor completo apenas quando necessário, e alguns estilos (`.dados-sensiveis`) reforçam visualmente informações sensíveis.
+  - **Diretivas e atributos sem vazar além da UI**:
+    - diretivas de formatação (CPF, telefone, e-mail) atuam apenas em elementos/template, sem persistir dados formatados em storage.
+  - **Storage mínimo**:
+    - `localStorage` guarda apenas o token e o usuário autenticado, o restante dos dados trafega via API mock.
+  - **Decisão**: mesmo em um teste simples, o objetivo foi demonstrar uma preocupação inicial com privacidade, evitando expor identificadores completos sem necessidade e separando claramente o que é dado sensível de rótulos/indicadores visuais.
 
 ---
 
@@ -335,28 +400,30 @@ Mas como este projeto lida apenas com **frontend + API mock**, usamos a soluçã
 
 ## ✔ Proxy de desenvolvimento do Angular
 
-Arquivo: `proxy.conf.json`
+Arquivo: `proxy.conf.js`
 
-```json
-{
-  "/api": {
-    "target": "http://json-server:3000",
-    "secure": false,
-    "changeOrigin": true,
-    "logLevel": "info"
+```js
+const targetHost = process.env.API_PROXY_HOST || 'json-server';
+
+module.exports = {
+  '/api': {
+    target: `http://${targetHost}:3000`,
+    secure: false,
+    changeOrigin: true,
+    logLevel: 'info',
+    pathRewrite: {
+      '^/api': ''
   }
 }
+};
 ```
 
-Com isso:
+Essa abordagem permite que:
 
-- O Angular recebe as requisições via `http://localhost:4200/api/...`
-- Ele repassa internamente para `http://json-server:3000`
-- Zero problemas de CORS  
-- Zero necessidade de configurar o json-server
+- Quando o front estiver em um container (Docker), o `targetHost` padrão continua sendo `json-server`.
+- Quando estiver em desenvolvimento local usamos `cross-env API_PROXY_HOST=localhost` (script `npm run start:dev:local`).
+- As duas formas são executadas pelos scripts (`npm run start` dentro do Compose e `npm run start:dev:local` localmente) sem mexer no proxy.
 
-> Esta escolha é **apenas para o teste**.  
-> Em aplicações reais, a estratégia de proxy/CORS dependeria da arquitetura adotada.
 
 ---
 
@@ -548,44 +615,31 @@ Para detalhes completos sobre as funcionalidades implementadas, arquitetura e de
 
 # 🧪 Estratégia de Testes
 
-O projeto adota uma abordagem de testes automatizados focada na confiabilidade dos fluxos principais.
+O projeto adota uma abordagem de testes automatizados focada na confiabilidade dos fluxos principais, com divisão clara entre testes unitários (Jasmine + Karma) e E2E (Cypress).
 
 ### ✅ Testes Implementados (Jasmine + Karma)
 
-| Camada | Arquivo | O que é testado? |
-|--------|---------|------------------|
-| **Core / Service** | `core/services/cliente.service.spec.ts` | Validação completa do CRUD, verificação de URLs, métodos HTTP (GET/POST/PUT/DELETE) e integração com o sistema de Logs. |
-| **Pages / Component** | `pages/clientes/lista-clientes/lista-clientes.component.spec.ts` | **✅ COMPLETA** - Validação abrangente do componente de listagem: carregamento inicial, filtros avançados (busca múltipla + status), paginação com estado preservado, exclusão com modal de confirmação, navegação com query params, métodos utilitários (formatação CPF/telefone/status) e tratamento robusto de erros. |
-| **Decorator** | (Via Service) | O teste do Service valida indiretamente se o decorator `@LogOperation` está interceptando as chamadas e registrando os logs corretamente no `LoggerService`. |
+Os detalhes completos estão em `documentacao/ESTRATEGIA_TESTES.md`, mas em resumo:
+
+- **Core / Services / Infraestrutura:**
+  - `ClienteService`, `LoadingService`, `AuthService`, `LogService`, `LoggerService`.
+  - `LoadingInterceptor`, pipes de máscara, `authGuard`, resolvers de clientes/logs.
+- **Pages:**
+  - `ListaClientesComponent` + `ListaClientesStore` (listagem, filtros, estado, exclusão/reativação).
+  - `LoginComponent` (fluxo de autenticação).
+  - `ListaLogsStore` (filtros e carregamento de logs).
+
+### ✅ Testes E2E (Cypress)
+
+- Configuração centralizada em `cypress.config.ts`.
+- Execução em Docker via `docker-compose.e2e.yml` (serviços `frontend-e2e`, `json-server-test-e2e`, `cypress-e2e`).
+- Spec principal:
+  - `cypress/e2e/clientes-lista.cy.ts`: valida login, filtros, query params, paginação, filtros de status, exclusão simples/em massa, reativação e navegação entre rotas para a **lista de clientes**.
 
 ### 🎯 Próximos Testes (Planejados)
 
-*   **Componente de Formulário:** Validar estados do Reactive Forms (invalid/valid), máscaras de entrada e mensagens de erro.
-*   **Integração E2E:** Testes end-to-end com Cypress para fluxos completos de usuário (cadastro → listagem → edição → exclusão).
-
-> **Para rodar os testes via Docker (Recomendado):**
-> ```bash
-> ./scripts/powershell/test.ps1  # Windows
-> ./scripts/bash/test.sh         # Linux/Mac
-> ```
-> **Comportamento:** O script sobe um ambiente isolado de testes que:
-> - Usa banco de dados separado (`db.test.json`)
-> - Roda em modo watch (auto-reload ao modificar arquivos)
-> - Permanece ativo por **10 minutos**
-> - **Expõe interface do Karma em http://localhost:9876**
-> - Pode ser encerrado antes com `Ctrl+C`
->
-> **🎯 Acesse http://localhost:9876 no browser para:**
-> - Visualizar testes rodando em tempo real
-> - Ver resultados detalhados de cada spec
-> - Debugar testes clicando em "Debug"
->
-> **Ou manualmente com Node local:**
-> ```bash
-> npm test
-> ```
->
-> **💡 Execução Paralela:** Você pode deixar o ambiente de desenvolvimento rodando (`start.sh/ps1`) e executar os testes simultaneamente em outro terminal — os ambientes são completamente isolados (containers separados + bancos de dados diferentes)!
+- **Componente de formulário de cliente:** validar estados do Reactive Forms (invalid/valid), regras condicionais do PDF, máscaras e mensagens de erro.
+- **Fluxos E2E adicionais:** cadastro/edição/exclusão de cliente assim que o formulário completo for implementado.
 
 ---
 
