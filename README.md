@@ -29,15 +29,29 @@ O objetivo é oferecer um ambiente totalmente funcional e padronizado, executáv
 
 ---
 
-## ⚡ Quick Start
+## Projeto Teste PGE (Frontend Angular)
 
-**Para executar o projeto:**
+Este repositório implementa o teste prático da **PGE-CE** usando Angular 19, PrimeNG e Docker, com foco em um ambiente 100% reproduzível para o avaliador.
+
+---
+
+## 📑 Índice
+
+- [⚡ Quick Start (Docker)](#-quick-start-docker)
+- [📄 Sobre o Desafio](#-sobre-o-desafio)
+- [🚧 Status Geral do Projeto](#-status-geral-do-projeto)
+- [📊 Resumo Requisitos x Implementação](#-resumo-requisitos-x-implementação)
+- [📚 Documentação Detalhada](#-documentação-detalhada)
+
+---
+
+## ⚡ Quick Start (Docker)
 
 ```bash
 # Windows
 ./scripts/powershell/start.ps1
 
-# Linux/Mac/Bash/ GitBash
+# Linux/Mac/Bash/GitBash
 ./scripts/bash/start.sh
 ```
 
@@ -51,20 +65,93 @@ O objetivo é oferecer um ambiente totalmente funcional e padronizado, executáv
 # Windows
 ./scripts/powershell/test.ps1
 
-# Linux/Mac/Bash/ GitBash
+# Linux/Mac/Bash/GitBash
 ./scripts/bash/test.sh
 ```
 
-**Acompanhar testes no browser:**
-- 🧪 **Interface do Karma:** http://localhost:9876
+---
 
-> **Nota:** A interface do Karma fica disponível por 10 minutos durante a execução dos testes.
+## 📄 Sobre o Desafio
+
+O projeto implementa o **Teste Prático - Desenvolvedor Front-End - Procuradoria Geral do Estado do Ceará**, cujo enunciado completo está disponível em PDF:
+
+- [📕 Especificação do Teste (PDF)](referencias/Teste%20Pr%C3%A1tico%20-%20Desenvolvedor%20-%20Front-End%20-%20Procuradoria%20Geral%20do%20Estado%20do%20Cear%C3%A1.pdf)
+
+Escopo principal:
+
+- Tela de **listagem de clientes** com filtros e preservação de estado.
+- Formulário reativo de cliente com **máscaras e validações**.
+- Integração com API (mock) e **logs de auditoria**.
+- Feedback ao usuário com **toasts**.
+- Testes automatizados.
 
 ---
 
-# 🏛️ Arquitetura & Decisões Técnicas
+## 🚧 Status Geral do Projeto
 
-Este projeto segue princípios de **Clean Code** e boas práticas do ecossistema Angular, adaptados para o escopo de um teste técnico. Abaixo, as principais decisões arquiteturais:
+> **EM CONSTRUÇÃO** – funcionalidades estão sendo entregues de forma incremental, priorizando a tela de listagem de clientes e a infraestrutura em torno dela (logs, loading, testes, Docker).
+
+Implementado até o momento (visão macro):
+
+- Listagem de clientes com filtros avançados, cards mobile e tabela desktop.
+- Logs de operações (json-server + tela de visualização).
+- Decorator de log (`@LogOperation`) e interceptor de loading global.
+- Ambiente Docker completo (dev, testes e build).
+- Testes unitários para serviços e tela de listagem.
+
+Pendente / em evolução:
+
+- Formulário reativo completo de cliente (cadastro/edição).
+- Testes E2E e testes específicos de formulário.
+
+---
+
+## 📊 Resumo Requisitos x Implementação
+
+Resumo condensado do comparativo detalhado entre o PDF do desafio e o estado atual do projeto:
+
+| Seção do PDF | Tópico                                    | Status atual                                |
+|--------------|-------------------------------------------|---------------------------------------------|
+| 1            | Formulário reativo + máscaras + diretiva  | ❌ Formulário / ✅ Diretivas (formatação)   |
+| 2            | Listagem + filtros + estado               | ✅ Implementado (lista + filtros + estado)  |
+| 3            | Modal de confirmação reutilizável         | ✅ Implementado                             |
+| 4            | Integração HTTP + Interceptors + feedback | ✅ Implementado                             |
+| 5            | Observabilidade (logs + toasts)           | ✅ Implementado                             |
+| 6            | Testes automatizados                      | ✅ Lista/Services / ❌ Formulário/E2E       |
+
+> O comparativo completo e sempre atualizado está em  
+> `documentacao/COMPARATIVO_REQUISITOS.md`.
+
+---
+
+## 📚 Documentação Detalhada
+
+Para não poluir o `README` com muitos detalhes de implementação, a documentação foi organizada na pasta `documentacao/`:
+
+- **[documentacao/AMBIENTE_E_EXECUCAO.md](documentacao/AMBIENTE_E_EXECUCAO.md)**  
+  Detalhes de ambientes (dev/test/prod), Docker, scripts, proxy e persistência.
+
+- **[documentacao/ARQUITETURA_DECISOES.md](documentacao/ARQUITETURA_DECISOES.md)**  
+  Arquitetura, estrutura de pastas (`core`/`pages`), loading global, decorator de logs, Docker-first.
+
+- **[documentacao/ESTRATEGIA_TESTES.md](documentacao/ESTRATEGIA_TESTES.md)**  
+  Estratégia de testes, cenário atual e próximos passos.
+
+- **[documentacao/FUNCIONALIDADES.md](documentacao/FUNCIONALIDADES.md)**  
+  Funcionalidades já implementadas (lista de clientes, infra, temas, etc.).
+
+- **[documentacao/COMPARATIVO_REQUISITOS.md](documentacao/COMPARATIVO_REQUISITOS.md)**  
+  Comparativo detalhado requisito a requisito entre o PDF e a implementação atual.
+
+---
+
+## 🧱 Tecnologias Utilizadas (Resumo)
+
+- **Angular 19** (Standalone Components)
+- **PrimeNG 19** + **PrimeFlex 4** + **PrimeIcons**
+- **json-server** para API mock
+- **Docker & Docker Compose** (Node 22, Nginx para build de produção)
+- **Jasmine + Karma** (testes unitários)
 
 ### 1. Path Aliases (@)
 Configuramos o `tsconfig.json` para utilizar atalhos de importação (`@models`, `@services`, `@shared`).
