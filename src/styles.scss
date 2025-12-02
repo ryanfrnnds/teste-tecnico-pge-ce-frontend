@@ -3,6 +3,7 @@
 @use './assets/primeng/toast.scss';
 @use './assets/primeng/layout.scss';
 @use './assets/primeng/form-field.scss';
+@use './assets/primeng/p-error.scss';
 @use './assets/primeng/dialog.scss';
 @use 'primeflex/primeflex.scss' as *;
 
@@ -96,4 +97,7 @@ a {
     background: var(--pge-neutral-500);
   }
 }
+
+/* === Form Validation Styles (Bootstrap-like for user request) === */
+/* Moved to assets/primeng/p-error.scss */
 

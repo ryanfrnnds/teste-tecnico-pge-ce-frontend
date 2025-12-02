@@ -1,0 +1,51 @@
+@use 'src/assets/themes/design-tokens.scss' as *;
+
+.cliente-form-page {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Ajustes finos no grid do form
+.formgrid {
+  margin-bottom: 0; // Remove margem inferior do grid para alinhar com botões
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+// Overrides para Inputs Transparentes (conforme solicitado)
+:host ::ng-deep {
+  .p-inputtext, 
+  .p-select,
+  .p-dropdown,
+  .p-calendar .p-inputtext,
+  .p-inputmask {
+    background-color: transparent !important;
+    /* Mantém a borda visível para indicar que é um campo */
+    &:not(.ng-dirty):not(:focus) {
+        border-color: var(--surface-border);
+    }
+  }
+  
+  /* Ajuste para o Select/Dropdown do PrimeNG que tem estrutura diferente */
+  .p-select .p-select-label {
+      background: transparent;
+  }
+  
+  /* Remove fundo do input group addon (se usado) */
+  .p-inputgroup-addon {
+      background: transparent !important;
+      border-color: var(--surface-border);
+  }
+}

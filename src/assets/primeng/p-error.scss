@@ -1,0 +1,48 @@
+@keyframes error-pulse {
+  0% {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes text-blink {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+.alert.p-error,
+.alert.role-errors {
+  background-color: transparent !important; /* Sem fundo */
+  border: none; /* Sem borda */
+  color: var(--red-500, #dc3545) !important; /* Texto vermelho */
+  box-shadow: none; /* Sombra removida */
+  padding: 0.1rem 0.5rem; /* Padding ainda mais reduzido */
+  margin-top: 0; /* Margem removida para colar no campo */
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  
+  /* Animation: smooth appearance */
+  animation: error-pulse 0.3s ease-out forwards;
+}
+
+/* Style for individual error messages inside the container */
+.alert.p-error > div {
+  display: flex;
+  align-items: center;
+  animation: text-blink 0.3s ease-in-out;
+}
+
+/* Optional: Add an icon before the error message */
+.alert.p-error > div::before {
+  content: '\e90b'; /* PrimeIcons 'pi-times-circle' */
+  font-family: 'primeicons';
+  margin-right: 0.25rem;
+  font-size: 0.9rem;
+}

@@ -10,6 +10,12 @@ const middlewares = jsonServer.defaults({
 server.use(middlewares);
 server.use(jsonServer.bodyParser);
 
+// Middleware para garantir que o header X-Total-Count seja exposto
+server.use((req, res, next) => {
+  res.header('Access-Control-Expose-Headers', 'X-Total-Count');
+  next();
+});
+
 server.post('/auth/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -80,6 +86,9 @@ server.post('/mock/clientes/popular', (req, res) => {
       cpf,
       email,
       telefone,
+      tipoContato: index % 2 === 0 ? 'Celular' : 'Whatsapp',
+      dataNascimento: new Date(1980 + (index % 30), index % 12, 1 + (index % 28)).toISOString(),
+      pais: 'BR',
       endereco: {
         cep: `60${(10000 + index).toString().padStart(5, '0')}`,
         logradouro: `Rua ${last}`,

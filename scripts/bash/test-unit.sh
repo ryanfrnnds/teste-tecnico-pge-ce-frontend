@@ -8,8 +8,11 @@ cd "$PROJECT_ROOT"
 echo "🧪 Executando testes unitários (Karma) em Docker..."
 echo
 
+# Garante que as imagens estejam atualizadas
+docker compose -f docker-compose.test.yml build
+
 # Sobe json-server de teste e roda o serviço de testes uma única vez
-docker compose -f docker-compose.test.yml run --rm frontend-test
+docker compose -f docker-compose.test.yml run --rm frontend-test npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
 
 echo
 echo "🧹 Encerrando ambiente de teste..."

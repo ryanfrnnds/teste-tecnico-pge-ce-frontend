@@ -1,0 +1,115 @@
+.pge-header {
+  background: linear-gradient(
+    135deg,
+    var(--pge-primary-green) 0%,
+    var(--pge-primary-green-dark) 100%
+  );
+  color: white;
+  box-shadow: var(--pge-shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: var(--pge-z-index-sticky);
+}
+
+/* Garante que os botões do HEADER sejam sempre visíveis e legíveis sobre o fundo escuro,
+   independente do tema claro/escuro global */
+.pge-header .p-button.p-button-text {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.pge-header .p-button.p-button-text:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+.pge-header-theme-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #ffffff;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+  }
+}
+
+/* --- Links de navegação do HEADER (Desktop) --- */
+.pge-header-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--pge-border-radius-md);
+  color: rgba(255, 255, 255, 0.85) !important; /* Force white text on header */
+  text-decoration: none;
+  font-weight: var(--pge-font-weight-medium);
+  transition: background-color var(--pge-transition-fast),
+    color var(--pge-transition-fast);
+}
+
+.pge-header-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff !important;
+}
+
+.pge-header-nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+  font-weight: var(--pge-font-weight-bold);
+}
+
+/* --- Links de navegação TABS (Mobile/Abaixo do header) --- */
+.pge-header-mobile-tabs {
+  position: sticky;
+  top: 3.25rem; /* header height approx */
+  z-index: calc(var(--pge-z-index-sticky) - 1);
+  /* 
+     Use surface-ground or specific color that guarantees visibility in light mode.
+     The variable --pge-surface-card might be undefined or transparent. 
+     Let's force a background color that works for the theme.
+  */
+  background-color: var(--pge-neutral-50); 
+  border-bottom: 1px solid var(--pge-neutral-200);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.pge-header-tab-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  margin: 0 0.5rem;
+  border-radius: var(--pge-border-radius-md);
+  text-decoration: none;
+  font-weight: var(--pge-font-weight-medium);
+  transition: all var(--pge-transition-fast);
+  
+  /* Explicit color for visibility in light mode */
+  color: #495057; /* Fallback dark gray */
+  color: var(--pge-neutral-700); 
+  background-color: transparent;
+}
+
+/* Dark mode override for tabs container and links */
+:host-context(.my-app-dark) .pge-header-mobile-tabs {
+    background-color: var(--pge-neutral-100);
+    border-bottom-color: var(--pge-neutral-300);
+}
+
+:host-context(.my-app-dark) .pge-header-tab-link {
+    color: var(--pge-neutral-400);
+}
+
+.pge-header-tab-link:hover {
+  color: var(--pge-primary-green);
+  background-color: rgba(0, 0, 0, 0.05); /* Neutral hover */
+}
+
+:host-context(.my-app-dark) .pge-header-tab-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.pge-header-tab-link.active {
+  color: white !important; /* Force white text no matter the theme */
+  background-color: var(--pge-primary-green);
+  font-weight: var(--pge-font-weight-semibold);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}

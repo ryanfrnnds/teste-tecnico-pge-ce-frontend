@@ -23,8 +23,10 @@
       "dom"
     ],
     "paths": {
-      "@core/*": ["src/app/core/*"],
-      "@pages/*": ["src/app/pages/*"]
+      "@dominio/*": ["src/app/dominio/*"],
+      "@negocio/*": ["src/app/negocio/*"],
+      "@infraestrutura/*": ["src/app/infraestrutura/*"],
+      "@apresentacao/*": ["src/app/apresentacao/*"]
     }
   },
   "angularCompilerOptions": {

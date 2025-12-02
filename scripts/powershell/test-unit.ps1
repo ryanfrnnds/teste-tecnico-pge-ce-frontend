@@ -6,7 +6,10 @@ Write-Host "🧪 Executando testes unitários (Karma) em Docker..." -ForegroundC
 Write-Host ""
 
 try {
-    docker compose -f docker-compose.test.yml run --rm frontend-test
+    # Garante que as imagens estejam atualizadas
+    docker compose -f docker-compose.test.yml build
+
+    docker compose -f docker-compose.test.yml run --rm frontend-test npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
 }
 finally {
     Write-Host ""

@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
-import { clientesResolver } from '@core/resolvers/clientes.resolver';
-import { logsResolver } from '@core/resolvers/logs.resolver';
-import { authGuard } from '@core/guards/auth.guard';
+import { authGuard } from '@infraestrutura/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -12,24 +10,38 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./pages/auth/login/login.component').then((m) => m.LoginComponent)
+      import('./apresentacao/pages/auth/login/login.component').then((m) => m.LoginComponent)
   },
   {
     path: 'clientes',
     loadComponent: () =>
-      import('./pages/clientes/lista-clientes/lista-clientes.component').then(
+      import('./apresentacao/pages/clientes/lista-clientes/lista-clientes.component').then(
         (m) => m.ListaClientesComponent
       ),
-    resolve: { clientes: clientesResolver },
+    canActivate: [authGuard]
+  },
+  {
+    path: 'clientes/novo',
+    loadComponent: () =>
+      import('./apresentacao/pages/clientes/cliente-form/cliente-form.component').then(
+        (m) => m.ClienteFormComponent
+      ),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'clientes/:id/editar',
+    loadComponent: () =>
+      import('./apresentacao/pages/clientes/cliente-form/cliente-form.component').then(
+        (m) => m.ClienteFormComponent
+      ),
     canActivate: [authGuard]
   },
   {
     path: 'logs',
     loadComponent: () =>
-      import('./pages/logs/lista-logs/lista-logs.component').then(
+      import('./apresentacao/pages/logs/lista-logs/lista-logs.component').then(
         (m) => m.ListaLogsComponent
       ),
-    resolve: { logs: logsResolver },
     canActivate: [authGuard]
   },
   {

@@ -25,5 +25,28 @@ export const PGETheme = definePreset(Aura, {
       900: '#005519',
       950: '{emerald.950}'
     }
+  },
+  components: {
+    inputtext: {
+      background: 'transparent'
+    },
+    inputnumber: {
+        background: 'transparent'
+    },
+    inputmask: {
+        background: 'transparent'
+    },
+    dropdown: {
+        background: 'transparent'
+    },
+    select: {
+        background: 'transparent'
+    },
+    multiselect: {
+        background: 'transparent'
+    },
+    textarea: {
+        background: 'transparent'
+    }
   }
 });

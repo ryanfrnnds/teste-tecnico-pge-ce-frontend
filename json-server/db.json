@@ -1,679 +1,74 @@
 {
   "clientes": [
     {
-      "id": "mimpw3e2-jrbc24",
-      "nome": "Ana Silva",
-      "cpf": "00111111111",
-      "email": "ana.silva0@exemplo.com",
-      "telefone": "8598000000",
+      "id": "cli-minxl6dy-0jx5qy",
+      "nome": "Helena Lima",
+      "email": "helena.lima@exemplo.com",
+      "cpf": "97756842851",
+      "telefone": "8888888888",
+      "tipoContato": "Residencial",
+      "dataNascimento": "1986-05-01T03:00:00.000Z",
+      "pais": "BR",
       "endereco": {
-        "cep": "6010000",
-        "logradouro": "Rua Silva",
-        "numero": "100",
+        "cep": "01001-000",
+        "logradouro": "Praça da Sé",
+        "numero": "14",
         "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Fortaleza",
-        "estado": "CE"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-4sqttq",
-      "nome": "Carlos Alves",
-      "cpf": "00111234568",
-      "email": "carlos.alves1@exemplo.com",
-      "telefone": "8598000037",
-      "endereco": {
-        "cep": "6010001",
-        "logradouro": "Rua Alves",
-        "numero": "101",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Sobral",
-        "estado": "PI"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-2aebzq",
-      "nome": "Juliana Costa",
-      "cpf": "00111358025",
-      "email": "juliana.costa2@exemplo.com",
-      "telefone": "8598000074",
-      "endereco": {
-        "cep": "6010002",
-        "logradouro": "Rua Costa",
-        "numero": "102",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Juazeiro do Norte",
-        "estado": "RN"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-i3qce7",
-      "nome": "Marcos Souza",
-      "cpf": "00111481482",
-      "email": "marcos.souza3@exemplo.com",
-      "telefone": "8598000111",
-      "endereco": {
-        "cep": "6010003",
-        "logradouro": "Rua Souza",
-        "numero": "103",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Caucaia",
-        "estado": "CE"
+        "bairro": "Sé",
+        "cidade": "São Paulo",
+        "estado": 2
       },
       "ativo": true
     },
     {
-      "id": "mimpw3e2-9amnp9",
-      "nome": "Fernanda Lima",
-      "cpf": "00111604939",
-      "email": "fernanda.lima4@exemplo.com",
-      "telefone": "8598000148",
+      "id": "cli-miny374p-bbwj8p",
+      "nome": "Ana Rodrigues",
+      "email": "ana.rodrigues@exemplo.com",
+      "cpf": "93468726642",
+      "telefone": "1111111111",
+      "tipoContato": "Celular",
+      "dataNascimento": "1997-05-14T03:00:00.000Z",
+      "pais": "BR",
       "endereco": {
-        "cep": "6010004",
-        "logradouro": "Rua Lima",
-        "numero": "104",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Maracanaú",
-        "estado": "PI"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-oepe45",
-      "nome": "Rafael Santos",
-      "cpf": "00111728396",
-      "email": "rafael.santos5@exemplo.com",
-      "telefone": "8598000185",
-      "endereco": {
-        "cep": "6010005",
-        "logradouro": "Rua Santos",
-        "numero": "105",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Fortaleza",
-        "estado": "RN"
+        "cep": "01001-000",
+        "logradouro": "Praça da Sé",
+        "numero": "213",
+        "complemento": "Apto 7",
+        "bairro": "Sé",
+        "cidade": "São Paulo",
+        "estado": 2
       },
       "ativo": true
-    },
-    {
-      "id": "mimpw3e2-txhpg3",
-      "nome": "Beatriz Silva",
-      "cpf": "00111851853",
-      "email": "beatriz.silva6@exemplo.com",
-      "telefone": "8598000222",
-      "endereco": {
-        "cep": "6010006",
-        "logradouro": "Rua Silva",
-        "numero": "106",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Sobral",
-        "estado": "CE"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-avzrff",
-      "nome": "Lucas Alves",
-      "cpf": "00111975310",
-      "email": "lucas.alves7@exemplo.com",
-      "telefone": "8598000259",
-      "endereco": {
-        "cep": "6010007",
-        "logradouro": "Rua Alves",
-        "numero": "107",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Juazeiro do Norte",
-        "estado": "PI"
-      },
-      "ativo": true
-    },
-    {
-      "id": "mimpw3e2-2p0tbu",
-      "nome": "Mariana Costa",
-      "cpf": "00112098767",
-      "email": "mariana.costa8@exemplo.com",
-      "telefone": "8598000296",
-      "endereco": {
-        "cep": "6010008",
-        "logradouro": "Rua Costa",
-        "numero": "108",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Caucaia",
-        "estado": "RN"
-      },
-      "ativo": true
-    },
-    {
-      "id": "mimpw3e2-h4hfd2",
-      "nome": "Paulo Souza",
-      "cpf": "00112222224",
-      "email": "paulo.souza9@exemplo.com",
-      "telefone": "8598000333",
-      "endereco": {
-        "cep": "6010009",
-        "logradouro": "Rua Souza",
-        "numero": "109",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Maracanaú",
-        "estado": "CE"
-      },
-      "ativo": true
-    },
-    {
-      "id": "mimpw3e2-6woysl",
-      "nome": "Ana Lima",
-      "cpf": "00112345681",
-      "email": "ana.lima10@exemplo.com",
-      "telefone": "8598000370",
-      "endereco": {
-        "cep": "6010010",
-        "logradouro": "Rua Lima",
-        "numero": "110",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Fortaleza",
-        "estado": "PI"
-      },
-      "ativo": true
-    },
-    {
-      "id": "mimpw3e2-sn595o",
-      "nome": "Carlos Santos",
-      "cpf": "00112469138",
-      "email": "carlos.santos11@exemplo.com",
-      "telefone": "8598000407",
-      "endereco": {
-        "cep": "6010011",
-        "logradouro": "Rua Santos",
-        "numero": "111",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Sobral",
-        "estado": "RN"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-99aax4",
-      "nome": "Juliana Silva",
-      "cpf": "00112592595",
-      "email": "juliana.silva12@exemplo.com",
-      "telefone": "8598000444",
-      "endereco": {
-        "cep": "6010012",
-        "logradouro": "Rua Silva",
-        "numero": "112",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Juazeiro do Norte",
-        "estado": "CE"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-knto2h",
-      "nome": "Fernanda Costa",
-      "cpf": "00112839509",
-      "email": "fernanda.costa14@exemplo.com",
-      "telefone": "8598000518",
-      "endereco": {
-        "cep": "6010014",
-        "logradouro": "Rua Costa",
-        "numero": "114",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Maracanaú",
-        "estado": "RN"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-ozx1tn",
-      "nome": "Rafael Souza",
-      "cpf": "00112962966",
-      "email": "rafael.souza15@exemplo.com",
-      "telefone": "8598000555",
-      "endereco": {
-        "cep": "6010015",
-        "logradouro": "Rua Souza",
-        "numero": "115",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Fortaleza",
-        "estado": "CE"
-      },
-      "ativo": true
-    },
-    {
-      "id": "mimpw3e2-ia76mu",
-      "nome": "Beatriz Lima",
-      "cpf": "00113086423",
-      "email": "beatriz.lima16@exemplo.com",
-      "telefone": "8598000592",
-      "endereco": {
-        "cep": "6010016",
-        "logradouro": "Rua Lima",
-        "numero": "116",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Sobral",
-        "estado": "PI"
-      },
-      "ativo": false
-    },
-    {
-      "id": "mimpw3e2-ueo4ht",
-      "nome": "Lucas Santos",
-      "cpf": "00113209880",
-      "email": "lucas.santos17@exemplo.com",
-      "telefone": "8598000629",
-      "endereco": {
-        "cep": "6010017",
-        "logradouro": "Rua Santos",
-        "numero": "117",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Juazeiro do Norte",
-        "estado": "RN"
-      },
-      "ativo": true
-    },
-    {
-      "id": "mimpw3e2-378pig",
-      "nome": "Mariana Silva",
-      "cpf": "00113333337",
-      "email": "mariana.silva18@exemplo.com",
-      "telefone": "8598000666",
-      "endereco": {
-        "cep": "6010018",
-        "logradouro": "Rua Silva",
-        "numero": "118",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Caucaia",
-        "estado": "CE"
-      },
-      "ativo": true
-    },
-    {
-      "id": "mimpw3e2-b5gpj6",
-      "nome": "Paulo Alves",
-      "cpf": "00113456794",
-      "email": "paulo.alves19@exemplo.com",
-      "telefone": "8598000703",
-      "endereco": {
-        "cep": "6010019",
-        "logradouro": "Rua Alves",
-        "numero": "119",
-        "complemento": "",
-        "bairro": "Bairro Central",
-        "cidade": "Maracanaú",
-        "estado": "PI"
-      },
-      "ativo": false
     }
   ],
   "logs": [
     {
-      "data": "2025-12-01T04:34:47.718Z",
+      "data": "2025-12-02T02:00:29.610Z",
       "acao": "CRIACAO",
-      "mensagem": "Cliente Ana Silva criado",
+      "mensagem": "Cliente Helena Lima criado",
       "usuario": "admin",
       "id": 1
     },
     {
-      "data": "2025-12-01T04:34:47.720Z",
-      "acao": "CRIACAO",
-      "mensagem": "Cliente Carlos Silva criado",
+      "data": "2025-12-02T02:14:14.247Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Helena Lima\" foi desativado",
       "usuario": "admin",
       "id": 2
     },
     {
-      "data": "2025-12-01T04:34:48.032Z",
-      "acao": "CRIACAO",
-      "mensagem": "Cliente Juliana Alves criado",
+      "data": "2025-12-02T02:14:21.362Z",
+      "acao": "ATUALIZACAO",
+      "mensagem": "Cliente \"Helena Lima\" foi reativado",
       "usuario": "admin",
       "id": 3
     },
     {
-      "data": "2025-12-01T05:33:13.244Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimnnrbo-vgojyn excluído",
+      "data": "2025-12-02T02:14:30.374Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Ana Rodrigues criado",
       "usuario": "admin",
       "id": 4
-    },
-    {
-      "data": "2025-12-01T05:33:14.962Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimnnrbo-szas6l excluído",
-      "usuario": "admin",
-      "id": 5
-    },
-    {
-      "data": "2025-12-01T05:33:17.226Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimnnrbo-qj17qg excluído",
-      "usuario": "admin",
-      "id": 6
-    },
-    {
-      "data": "2025-12-01T09:06:44.890Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-tob993 excluído",
-      "usuario": "admin",
-      "id": 7
-    },
-    {
-      "data": "2025-12-01T09:32:34.961Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-6woysl marcado como inativo",
-      "usuario": "admin",
-      "id": 8
-    },
-    {
-      "data": "2025-12-01T09:32:35.240Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-ia76mu marcado como inativo",
-      "usuario": "admin",
-      "id": 9
-    },
-    {
-      "data": "2025-12-01T09:32:35.241Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-4sqttq marcado como inativo",
-      "usuario": "admin",
-      "id": 10
-    },
-    {
-      "data": "2025-12-01T09:32:35.242Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-sn595o marcado como inativo",
-      "usuario": "admin",
-      "id": 11
-    },
-    {
-      "data": "2025-12-01T09:32:35.244Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-knto2h marcado como inativo",
-      "usuario": "admin",
-      "id": 12
-    },
-    {
-      "data": "2025-12-01T09:32:35.244Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-9amnp9 marcado como inativo",
-      "usuario": "admin",
-      "id": 13
-    },
-    {
-      "data": "2025-12-01T09:32:35.303Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-2aebzq marcado como inativo",
-      "usuario": "admin",
-      "id": 14
-    },
-    {
-      "data": "2025-12-01T09:32:35.571Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-avzrff marcado como inativo",
-      "usuario": "admin",
-      "id": 15
-    },
-    {
-      "data": "2025-12-01T09:32:35.572Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-ueo4ht marcado como inativo",
-      "usuario": "admin",
-      "id": 16
-    },
-    {
-      "data": "2025-12-01T09:32:35.573Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-2p0tbu marcado como inativo",
-      "usuario": "admin",
-      "id": 17
-    },
-    {
-      "data": "2025-12-01T09:32:48.927Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-b5gpj6 marcado como inativo",
-      "usuario": "admin",
-      "id": 18
-    },
-    {
-      "data": "2025-12-01T09:32:49.235Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente mimpw3e2-oepe45 marcado como inativo",
-      "usuario": "admin",
-      "id": 19
-    },
-    {
-      "data": "2025-12-01T09:39:49.686Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-6woysl atualizado",
-      "usuario": "admin",
-      "id": 20
-    },
-    {
-      "data": "2025-12-01T09:39:49.980Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-jrbc24 atualizado",
-      "usuario": "admin",
-      "id": 21
-    },
-    {
-      "data": "2025-12-01T09:39:49.981Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-ia76mu atualizado",
-      "usuario": "admin",
-      "id": 22
-    },
-    {
-      "data": "2025-12-01T09:39:49.983Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-txhpg3 atualizado",
-      "usuario": "admin",
-      "id": 23
-    },
-    {
-      "data": "2025-12-01T09:39:49.984Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-4sqttq atualizado",
-      "usuario": "admin",
-      "id": 24
-    },
-    {
-      "data": "2025-12-01T09:39:49.985Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-sn595o atualizado",
-      "usuario": "admin",
-      "id": 25
-    },
-    {
-      "data": "2025-12-01T09:39:50.010Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-knto2h atualizado",
-      "usuario": "admin",
-      "id": 26
-    },
-    {
-      "data": "2025-12-01T09:39:50.304Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-9amnp9 atualizado",
-      "usuario": "admin",
-      "id": 27
-    },
-    {
-      "data": "2025-12-01T09:39:50.306Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-2aebzq atualizado",
-      "usuario": "admin",
-      "id": 28
-    },
-    {
-      "data": "2025-12-01T09:39:50.306Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-99aax4 atualizado",
-      "usuario": "admin",
-      "id": 29
-    },
-    {
-      "data": "2025-12-01T09:39:55.549Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-avzrff atualizado",
-      "usuario": "admin",
-      "id": 30
-    },
-    {
-      "data": "2025-12-01T09:39:55.850Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-ueo4ht atualizado",
-      "usuario": "admin",
-      "id": 31
-    },
-    {
-      "data": "2025-12-01T09:39:55.852Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-i3qce7 atualizado",
-      "usuario": "admin",
-      "id": 32
-    },
-    {
-      "data": "2025-12-01T09:39:55.852Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-2p0tbu atualizado",
-      "usuario": "admin",
-      "id": 33
-    },
-    {
-      "data": "2025-12-01T09:39:55.853Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-378pig atualizado",
-      "usuario": "admin",
-      "id": 34
-    },
-    {
-      "data": "2025-12-01T09:39:55.853Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-b5gpj6 atualizado",
-      "usuario": "admin",
-      "id": 35
-    },
-    {
-      "data": "2025-12-01T09:39:55.879Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-h4hfd2 atualizado",
-      "usuario": "admin",
-      "id": 36
-    },
-    {
-      "data": "2025-12-01T09:39:56.174Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-oepe45 atualizado",
-      "usuario": "admin",
-      "id": 37
-    },
-    {
-      "data": "2025-12-01T09:39:56.175Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente mimpw3e2-ozx1tn atualizado",
-      "usuario": "admin",
-      "id": 38
-    },
-    {
-      "data": "2025-12-01T09:48:18.757Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Ana Lima\" foi desativado",
-      "usuario": "admin",
-      "id": 39
-    },
-    {
-      "data": "2025-12-01T09:48:19.042Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Ana Silva\" foi desativado",
-      "usuario": "admin",
-      "id": 40
-    },
-    {
-      "data": "2025-12-01T09:48:19.044Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Beatriz Lima\" foi desativado",
-      "usuario": "admin",
-      "id": 41
-    },
-    {
-      "data": "2025-12-01T09:48:19.045Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Beatriz Silva\" foi desativado",
-      "usuario": "admin",
-      "id": 42
-    },
-    {
-      "data": "2025-12-01T09:48:19.046Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Carlos Alves\" foi desativado",
-      "usuario": "admin",
-      "id": 43
-    },
-    {
-      "data": "2025-12-01T09:48:19.047Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Carlos Santos\" foi desativado",
-      "usuario": "admin",
-      "id": 44
-    },
-    {
-      "data": "2025-12-01T09:48:19.081Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Fernanda Costa\" foi desativado",
-      "usuario": "admin",
-      "id": 45
-    },
-    {
-      "data": "2025-12-01T09:48:19.373Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Fernanda Lima\" foi desativado",
-      "usuario": "admin",
-      "id": 46
-    },
-    {
-      "data": "2025-12-01T09:48:19.377Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Juliana Costa\" foi desativado",
-      "usuario": "admin",
-      "id": 47
-    },
-    {
-      "data": "2025-12-01T09:48:19.378Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Juliana Silva\" foi desativado",
-      "usuario": "admin",
-      "id": 48
-    },
-    {
-      "data": "2025-12-01T09:48:34.726Z",
-      "acao": "ATUALIZACAO",
-      "mensagem": "Cliente \"Ana Lima\" foi reativado",
-      "usuario": "admin",
-      "id": 49
-    },
-    {
-      "data": "2025-12-01T09:49:57.925Z",
-      "acao": "EXCLUSAO",
-      "mensagem": "Cliente \"Paulo Alves\" foi desativado",
-      "usuario": "admin",
-      "id": 50
     }
   ],
   "users": [
@@ -683,6 +78,99 @@
       "password": "admin",
       "name": "Administrador do Sistema",
       "role": "admin"
+    }
+  ],
+  "paises": [
+    {
+      "id": 1,
+      "codigo": "BR",
+      "nome": "Brasil"
+    },
+    {
+      "id": 2,
+      "codigo": "US",
+      "nome": "Estados Unidos"
+    },
+    {
+      "id": 3,
+      "codigo": "PT",
+      "nome": "Portugal"
+    }
+  ],
+  "estados": [
+    {
+      "id": 1,
+      "sigla": "CE",
+      "nome": "Ceará",
+      "paisId": 1
+    },
+    {
+      "id": 2,
+      "sigla": "SP",
+      "nome": "São Paulo",
+      "paisId": 1
+    },
+    {
+      "id": 3,
+      "sigla": "NY",
+      "nome": "Nova York",
+      "paisId": 2
+    },
+    {
+      "id": 4,
+      "sigla": "LX",
+      "nome": "Lisboa",
+      "paisId": 3
+    }
+  ],
+  "municipios": [
+    {
+      "id": 1,
+      "nome": "Fortaleza",
+      "estadoId": 1
+    },
+    {
+      "id": 2,
+      "nome": "Sobral",
+      "estadoId": 1
+    },
+    {
+      "id": 3,
+      "nome": "São Paulo",
+      "estadoId": 2
+    },
+    {
+      "id": 4,
+      "nome": "Nova York",
+      "estadoId": 3
+    },
+    {
+      "id": 5,
+      "nome": "Lisboa",
+      "estadoId": 4
+    }
+  ],
+  "ceps": [
+    {
+      "id": 1,
+      "cep": "60100000",
+      "logradouro": "Rua Fictícia 1",
+      "bairro": "Aldeota",
+      "municipioId": 1
+    },
+    {
+      "id": 2,
+      "cep": "60000000",
+      "logradouro": "Avenida Central",
+      "bairro": "Centro",
+      "municipioId": 1
+    },
+    {
+      "id": 3,
+      "cep": "01000000",
+      "logradouro": "Rua Paulista",
+      "bairro": "Bela Vista",
+      "municipioId": 3
     }
   ]
 }

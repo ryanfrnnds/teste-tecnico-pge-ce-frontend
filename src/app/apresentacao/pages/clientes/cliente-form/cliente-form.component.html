@@ -1,0 +1,208 @@
+<div class="cliente-form-page flex flex-column flex-1 min-h-0 surface-ground p-3 gap-3">
+  <p-card class="max-w-6xl w-full m-auto shadow-2">
+    <form [formGroup]="store.form" (ngSubmit)="store.salvar()" class="p-fluid grid formgrid">
+      
+      <div class="col-12 flex justify-content-between align-items-center mb-4">
+        <h3 class="m-0 text-xl font-semibold text-900">Formulário de Cliente</h3>
+        <p-button 
+            *ngIf="store.modo() === 'novo'"
+            label="Preencher Aleatório" 
+            icon="pi pi-bolt" 
+            styleClass="p-button-outlined p-button-secondary p-button-sm" 
+            (onClick)="store.preencherComDadosAleatorios()">
+        </p-button>
+      </div>
+
+      <!-- PRIMEIRA LINHA: Nome, CPF, Tipo Contato, Telefone -->
+      <div class="col-12 sm:col-6 md:col-4 xl:col-3 field">
+        <p-floatLabel variant="on">
+          <input pInputText id="nome" type="text" formControlName="nome" class="w-full" />
+          <label for="nome">Nome</label>
+        </p-floatLabel>
+        @if (nome.invalid && (nome.dirty || nome.touched)) {
+          <div class="alert p-error">
+            @if (nome.hasError('required')) { <div>Nome é obrigatório.</div> }
+            @if (nome.hasError('minlength')) { <div>Mínimo 3 caracteres.</div> }
+          </div>
+        }
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-2 xl:col-3 field">
+        <p-floatLabel variant="on">
+          <p-inputMask id="cpf" formControlName="cpf" mask="999.999.999-99" styleClass="w-full" class="w-full"></p-inputMask>
+          <label for="cpf">CPF</label>
+        </p-floatLabel>
+        @if (cpf.invalid && (cpf.dirty || cpf.touched)) {
+          <div class="alert p-error">
+            @if (cpf.hasError('required')) { <div>Obrigatório.</div> }
+            @if (cpf.hasError('cpfInvalido')) { <div>CPF inválido.</div> }
+          </div>
+        }
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-2 xl:col-3 field">
+        <p-floatLabel variant="on">
+          <p-select id="tipoContato" formControlName="tipoContato" [options]="['Residencial', 'Fixo', 'Whatsapp']" [style]="{ width: '100%' }" styleClass="w-full"></p-select>
+          <label for="tipoContato">Tipo de contato</label>
+        </p-floatLabel>
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-4 xl:col-3 field">
+        <p-floatLabel variant="on">
+          @if (store.telefoneMask()) {
+            <p-inputMask id="telefone" formControlName="telefone" [mask]="store.telefoneMask()!" styleClass="w-full" class="w-full"></p-inputMask>
+          } @else {
+            <input pInputText id="telefone" type="text" formControlName="telefone" class="w-full" />
+          }
+          <label for="telefone">Telefone</label>
+        </p-floatLabel>
+        @if (telefone.invalid && (telefone.dirty || telefone.touched)) {
+          <div class="alert p-error">
+            @if (telefone.hasError('required')) { <div>Obrigatório.</div> }
+          </div>
+        }
+      </div>
+
+      <!-- SEGUNDA LINHA: Nascimento, Email -->
+      <div class="col-12 sm:col-6 md:col-3 xl:col-3 field">
+        <p-floatLabel variant="on">
+          <p-calendar id="dataNascimento" formControlName="dataNascimento" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" class="w-full" styleClass="w-full"></p-calendar>
+          <label for="dataNascimento">Nascimento</label>
+        </p-floatLabel>
+        @if (dataNascimento.invalid && (dataNascimento.dirty || dataNascimento.touched)) {
+          <div class="alert p-error">
+            @if (dataNascimento.hasError('required')) { <div>Obrigatório.</div> }
+            @if (dataNascimento.hasError('dataFutura')) { <div>Data futura.</div> }
+          </div>
+        }
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-6 xl:col-6 field">
+        <p-floatLabel variant="on">
+          <input pInputText id="email" type="email" formControlName="email" class="w-full" />
+          <label for="email">E-mail</label>
+        </p-floatLabel>
+        @if (email.invalid && (email.dirty || email.touched)) {
+          <div class="alert p-error">
+            @if (email.hasError('required')) { <div>Obrigatório.</div> }
+            @if (email.hasError('email')) { <div>E-mail inválido.</div> }
+          </div>
+        }
+      </div>
+
+      <!-- TERCEIRA LINHA: País, Estado, Município -->
+      <div class="col-12 sm:col-6 md:col-4 xl:col-4 field">
+        <p-floatLabel variant="on">
+          <p-select id="pais" formControlName="pais" [options]="store.paises()" optionLabel="nome" optionValue="codigo" [style]="{ width: '100%' }" styleClass="w-full"></p-select>
+          <label for="pais">País</label>
+        </p-floatLabel>
+        @if (pais.invalid && (pais.dirty || pais.touched)) {
+          <div class="alert p-error">
+            @if (pais.hasError('required')) { <div>Obrigatório.</div> }
+          </div>
+        }
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-4 xl:col-4 field" formGroupName="endereco">
+        <p-floatLabel variant="on">
+          <p-select id="estado" formControlName="estado" [options]="store.estadosFiltrados()" optionLabel="nome" optionValue="id" [style]="{ width: '100%' }" styleClass="w-full"></p-select>
+          <label for="estado">Estado</label>
+        </p-floatLabel>
+        @if (estado.invalid && (estado.dirty || estado.touched)) {
+          <div class="alert p-error">
+            @if (estado.hasError('required')) { <div>Obrigatório.</div> }
+          </div>
+        }
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-4 xl:col-4 field" formGroupName="endereco">
+        <p-floatLabel variant="on">
+          <p-select id="cidade" formControlName="cidade" [options]="store.municipiosFiltrados()" optionLabel="nome" optionValue="nome" [style]="{ width: '100%' }" styleClass="w-full"></p-select>
+          <label for="cidade">Município</label>
+        </p-floatLabel>
+        @if (cidade.invalid && (cidade.dirty || cidade.touched)) {
+          <div class="alert p-error">
+            @if (cidade.hasError('required')) { <div>Obrigatório.</div> }
+          </div>
+        }
+      </div>
+
+      <!-- DIVISOR DE ENDEREÇO -->
+      <div class="col-12 mt-2 mb-2">
+        <div class="flex align-items-center gap-2 text-700">
+          <i class="pi pi-map-marker"></i>
+          <span class="font-semibold text-lg">Endereço</span>
+          <div class="flex-1 border-bottom-1 surface-border ml-2"></div>
+        </div>
+      </div>
+
+      <!-- QUARTA LINHA: CEP, Logradouro, Número, Bairro -->
+      <div class="col-12 sm:col-6 md:col-2 xl:col-3 field" formGroupName="endereco">
+        <p-floatLabel variant="on">
+          @if (store.cepMask()) {
+            <p-inputMask id="cep" formControlName="cep" [mask]="store.cepMask()!" styleClass="w-full" class="w-full" (onBlur)="store.buscarCep()"></p-inputMask>
+          } @else {
+            <input pInputText id="cep" type="text" formControlName="cep" class="w-full" (blur)="store.buscarCep()" />
+          }
+          <label for="cep">CEP</label>
+        </p-floatLabel>
+        @if (cep.invalid && (cep.dirty || cep.touched)) {
+          <div class="alert p-error">
+            @if (cep.hasError('required')) { <div>Obrigatório.</div> }
+          </div>
+        }
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-5 xl:col-3 field" formGroupName="endereco">
+        <p-floatLabel variant="on">
+          <input pInputText id="logradouro" type="text" formControlName="logradouro" class="w-full" />
+          <label for="logradouro">Logradouro</label>
+        </p-floatLabel>
+        @if (logradouro.invalid && (logradouro.dirty || logradouro.touched)) {
+          <div class="alert p-error">
+            @if (logradouro.hasError('required')) { <div>Obrigatório.</div> }
+          </div>
+        }
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-2 xl:col-3 field" formGroupName="endereco">
+        <p-floatLabel variant="on">
+          <input pInputText id="numero" type="text" formControlName="numero" class="w-full" maxlength="5" />
+          <label for="numero">Número</label>
+        </p-floatLabel>
+        @if (numero.invalid && (numero.dirty || numero.touched)) {
+          <div class="alert p-error">
+            @if (numero.hasError('required')) { <div>Obrigatório.</div> }
+            @if (numero.hasError('maxlength')) { <div>Máx. 5 caracteres.</div> }
+          </div>
+        }
+      </div>
+
+      <div class="col-12 sm:col-6 md:col-3 xl:col-3 field" formGroupName="endereco">
+        <p-floatLabel variant="on">
+          <input pInputText id="bairro" type="text" formControlName="bairro" class="w-full" />
+          <label for="bairro">Bairro</label>
+        </p-floatLabel>
+        @if (bairro.invalid && (bairro.dirty || bairro.touched)) {
+          <div class="alert p-error">
+            @if (bairro.hasError('required')) { <div>Obrigatório.</div> }
+          </div>
+        }
+      </div>
+
+      <!-- QUINTA LINHA: Complemento -->
+      <div class="col-12 field mb-0" formGroupName="endereco">
+        <p-floatLabel variant="on">
+          <input pInputText id="complemento" type="text" formControlName="complemento" class="w-full" />
+          <label for="complemento">Complemento <span class="font-normal text-500 ml-1 text-sm">(Opcional)</span></label>
+        </p-floatLabel>
+      </div>
+
+      <!-- BOTÕES -->
+      <div class="col-12 flex justify-content-end gap-2 mt-2 pt-2">
+        <p-button type="submit" [label]="store.modo() === 'novo' ? 'Salvar' : 'Atualizar'" icon="pi pi-save" [loading]="store.carregando()"></p-button>
+        <p-button type="button" label="Cancelar" icon="pi pi-times" styleClass="p-button-outlined p-button-secondary" (onClick)="store.voltarParaLista()"></p-button>
+      </div>
+    </form>
+  </p-card>
+</div>

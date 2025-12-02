@@ -7,9 +7,9 @@ import { providePrimeNG } from 'primeng/config';
 import { PGETheme } from '../assets/themes/pge-theme';
 import { MessageService } from 'primeng/api';
 import { ConfirmationService } from 'primeng/api';
-import { LoadingInterceptor } from './core/interceptors/loading.interceptor';
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-import { ComponentLoadingInterceptor } from './core/interceptors/component-loading.interceptor';
+import { LoadingInterceptor } from '@infraestrutura/interceptors/loading.interceptor';
+import { AuthInterceptor } from '@infraestrutura/interceptors/auth.interceptor';
+import { ComponentLoadingInterceptor } from '@infraestrutura/interceptors/component-loading.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
