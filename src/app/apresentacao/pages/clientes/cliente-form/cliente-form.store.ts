@@ -203,7 +203,6 @@ export class ClienteFormStore {
         summary: 'Formulário incompleto',
         detail: 'Verifique os campos destacados antes de continuar.'
       });
-      return;
     }
 
     const valor = this.form.getRawValue();

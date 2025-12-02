@@ -53,12 +53,15 @@ describe('LoadingService', () => {
     });
 
     it('deve manter carregando true em múltiplas requisições', (done) => {
-      let carregandoChamadas = 0;
-
+      const valores: boolean[] = [];
+      
       service.carregando.subscribe(carregando => {
-        carregandoChamadas++;
-        if (carregandoChamadas === 3) { // false -> true -> true
-          expect(carregando).toBeTrue();
+        valores.push(carregando);
+        
+        // Esperamos: false (inicial), true (req 1), (req 2 não emite novo valor)
+        if (valores.length === 2) {
+          expect(valores).toEqual([false, true]);
+          expect(service['requisicoesAtivas$'].value).toBeGreaterThan(0);
           done();
         }
       });
@@ -140,7 +143,7 @@ describe('LoadingService', () => {
     });
 
     it('deve gerenciar estado de carregando corretamente', (done) => {
-      const valoresEsperados = [false, true, true, false];
+      const valoresEsperados = [false, true, false];
       let index = 0;
 
       service.carregando.subscribe(carregando => {
@@ -152,10 +155,10 @@ describe('LoadingService', () => {
         }
       });
 
-      service.incrementarRequisicao(); // true
-      service.incrementarRequisicao(); // true
-      service.decrementarRequisicao(); // true
-      service.decrementarRequisicao(); // false
+      service.incrementarRequisicao(); // false -> true
+      service.incrementarRequisicao(); // permanece true
+      service.decrementarRequisicao(); // permanece true
+      service.decrementarRequisicao(); // true -> false
     });
   });
 });

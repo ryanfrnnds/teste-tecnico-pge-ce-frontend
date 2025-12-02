@@ -6,12 +6,21 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class MaskPhonePipe implements PipeTransform {
 
-  transform(value: string): string {
+  transform(value: any): any {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    if (typeof value !== 'string') {
+      return value;
+    }
+
     if (!value) {
       return '';
     }
 
     const digitos = value.replace(/\D/g, '');
+    
     if (digitos.length === 11) {
       // Telefone mascarado: (85) 9****-0259
       return `(${digitos.slice(0, 2)}) 9****-${digitos.slice(7)}`;

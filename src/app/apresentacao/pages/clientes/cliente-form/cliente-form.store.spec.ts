@@ -58,12 +58,12 @@ describe('ClienteFormStore', () => {
       ]
     });
 
-    store = TestBed.inject(ClienteFormStore);
-
     // Default mocks
     localizacaoServiceSpy.listarPaises.and.returnValue(of(mockPaises));
     localizacaoServiceSpy.listarEstados.and.returnValue(of(mockEstados));
     localizacaoServiceSpy.listarMunicipios.and.returnValue(of(mockMunicipios));
+
+    store = TestBed.inject(ClienteFormStore);
   });
 
   it('deve ser criado', () => {
@@ -153,7 +153,11 @@ describe('ClienteFormStore', () => {
 
   it('deve tratar erro ao salvar', () => {
     store.init(null);
-    store.form.patchValue({ ...mockCliente, id: undefined }); // Valid form
+    store.form.patchValue({ 
+      ...mockCliente, 
+      dataNascimento: new Date(mockCliente.dataNascimento!),
+      id: undefined 
+    }); // Valid form
     
     clienteServiceSpy.criar.and.returnValue(throwError(() => new Error('Erro API')));
     

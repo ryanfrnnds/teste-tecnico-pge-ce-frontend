@@ -71,9 +71,16 @@ describe('ListaClientesComponent', () => {
     storeMock = store as jasmine.SpyObj<ListaClientesStore>;
 
     await TestBed.configureTestingModule({
-      imports: [ListaClientesComponent, ReactiveFormsModule],
-      providers: [{ provide: ListaClientesStore, useValue: storeMock }]
-    }).compileComponents();
+      imports: [ListaClientesComponent, ReactiveFormsModule]
+    })
+    .overrideComponent(ListaClientesComponent, {
+      set: {
+        providers: [
+          { provide: ListaClientesStore, useValue: storeMock }
+        ]
+      }
+    })
+    .compileComponents();
 
     fixture = TestBed.createComponent(ListaClientesComponent);
     component = fixture.componentInstance;

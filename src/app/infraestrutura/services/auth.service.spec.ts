@@ -61,11 +61,17 @@ describe('AuthService', () => {
     localStorage.setItem('teste-pge-token', 'stored-token');
     localStorage.setItem('teste-pge-user', JSON.stringify(mockUser));
 
-    // Recria o serviço para disparar restoreSession
-    service = TestBed.inject(AuthService);
+    // Reset para garantir nova instância que leia o storage no construtor
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [AuthService, { provide: Router, useValue: routerSpy }]
+    });
 
-    expect(service.isAuthenticated()).toBeTrue();
-    expect(service.usuario).toEqual(mockUser);
+    const newService = TestBed.inject(AuthService);
+
+    expect(newService.isAuthenticated()).toBeTrue();
+    expect(newService.usuario).toEqual(mockUser);
   });
 
   it('deve fazer logout limpando storage e redirecionando para /login', () => {

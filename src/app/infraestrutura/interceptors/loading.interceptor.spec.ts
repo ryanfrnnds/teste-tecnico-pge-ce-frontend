@@ -59,17 +59,20 @@ describe('LoadingInterceptor', () => {
       httpClient.get('/api/test1').subscribe();
       httpClient.get('/api/test2').subscribe();
 
-      expect(valoresCarregando).toEqual([false, true, true]);
+      // [false (inicial), true (primeira req)]. Segunda req não emite novo true.
+      expect(valoresCarregando).toEqual([false, true]);
 
       const req1 = httpTestingController.expectOne('/api/test1');
       req1.flush({});
 
-      expect(valoresCarregando).toEqual([false, true, true, true]);
+      // Continua true pois tem 1 req pendente
+      expect(valoresCarregando).toEqual([false, true]);
 
       const req2 = httpTestingController.expectOne('/api/test2');
       req2.flush({});
 
-      expect(valoresCarregando).toEqual([false, true, true, true, false]);
+      // Volta a false
+      expect(valoresCarregando).toEqual([false, true, false]);
     });
 
     it('deve lidar com erro nas requisições da API', () => {
@@ -80,7 +83,7 @@ describe('LoadingInterceptor', () => {
       });
 
       httpClient.get('/api/test').subscribe({
-        error: () => {} // ignorar erro para o teste
+        error: () => {} 
       });
 
       expect(carregandoValor).toBeTrue();
@@ -94,30 +97,32 @@ describe('LoadingInterceptor', () => {
 
   describe('Requisições fora da API', () => {
     it('não deve controlar loading para assets estáticos', () => {
-      let carregandoChamado = false;
+      let carregandoValor = false;
 
-      loadingService.carregando.subscribe(() => {
-        carregandoChamado = true;
+      loadingService.carregando.subscribe(val => {
+        carregandoValor = val;
       });
 
       httpClient.get('/assets/test.png').subscribe();
 
-      expect(carregandoChamado).toBeFalse();
+      // Deve permanecer false (valor inicial) e não ter mudado para true
+      expect(carregandoValor).toBeFalse();
 
       const req = httpTestingController.expectOne('/assets/test.png');
-      req.flush(new Blob());
+      // Não precisamos de corpo específico para este teste; evitar Blob para não forçar conversão JSON
+      req.flush({});
     });
 
     it('não deve controlar loading para outras rotas', () => {
-      let carregandoChamado = false;
+      let carregandoValor = false;
 
-      loadingService.carregando.subscribe(() => {
-        carregandoChamado = true;
+      loadingService.carregando.subscribe(val => {
+        carregandoValor = val;
       });
 
       httpClient.get('/outra-rota').subscribe();
 
-      expect(carregandoChamado).toBeFalse();
+      expect(carregandoValor).toBeFalse();
 
       const req = httpTestingController.expectOne('/outra-rota');
       req.flush({});

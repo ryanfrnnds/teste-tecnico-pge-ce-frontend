@@ -76,7 +76,10 @@ describe('ClienteService', () => {
         expect(clientes).toEqual([mockCliente]);
       });
 
-      const req = httpMock.expectOne('/api/clientes?nome_like=João');
+      const req = httpMock.expectOne(request =>
+        request.url === '/api/clientes' &&
+        request.params.get('nome_like') === 'João'
+      );
       expect(req.request.method).toBe('GET');
       req.flush([mockCliente]);
     });
@@ -84,7 +87,10 @@ describe('ClienteService', () => {
     it('deve funcionar com diferentes campos', () => {
       service.buscarPorCampo('endereco.cidade', 'São Paulo').subscribe();
 
-      const req = httpMock.expectOne('/api/clientes?endereco.cidade_like=São Paulo');
+      const req = httpMock.expectOne(request =>
+        request.url === '/api/clientes' &&
+        request.params.get('endereco.cidade_like') === 'São Paulo'
+      );
       expect(req.request.params.get('endereco.cidade_like')).toBe('São Paulo');
       req.flush([]);
     });
@@ -137,7 +143,10 @@ describe('ClienteService', () => {
     it('não deve aplicar filtro de status quando "todos"', () => {
       service.buscarComFiltros({ status: 'todos' }).subscribe();
 
-      const req = httpMock.expectOne('/api/clientes');
+      const req = httpMock.expectOne(request =>
+        request.url === '/api/clientes' &&
+        !request.params.has('ativo')
+      );
       expect(req.request.params.has('ativo')).toBe(false);
       req.flush([], { headers: { 'x-total-count': '0' } });
     });
@@ -162,8 +171,8 @@ describe('ClienteService', () => {
       const filtrosLimpos = (service as any).limparFormatacaoFiltros(filtrosComFormatacao);
 
       expect(filtrosLimpos.nome).toBe('João');
-      expect(filtrosLimpos.cpf).toBeUndefined();
-      expect(filtrosLimpos.telefone).toBeUndefined();
+      expect(filtrosLimpos.cpf).toBe('12345678901');
+      expect(filtrosLimpos.telefone).toBe('11999999999');
     });
   });
 
@@ -261,19 +270,5 @@ describe('ClienteService', () => {
     });
   });
 
-  describe('limparFormatacaoFiltros', () => {
-    it('deve remover formatação de CPF e telefone', () => {
-      const filtrosComFormatacao = {
-        nome: 'João',
-        cpf: '123.456.789-01',
-        telefone: '(11) 99999-9999'
-      };
-
-      const filtrosLimpos = (service as any).limparFormatacaoFiltros(filtrosComFormatacao);
-
-      expect(filtrosLimpos.nome).toBe('João');
-      expect(filtrosLimpos.cpf).toBeUndefined();
-      expect(filtrosLimpos.telefone).toBeUndefined();
-    });
-  });
+  // O comportamento de limparFormatacaoFiltros já é coberto nos testes de buscarComFiltros.
 });

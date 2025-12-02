@@ -26,7 +26,9 @@ describe('ListaClientesStore', () => {
   } as unknown as ActivatedRoute;
 
   beforeEach(() => {
-    clienteServiceSpy = jasmine.createSpyObj('ClienteService', ['buscarComFiltros']);
+    clienteServiceSpy = jasmine.createSpyObj('ClienteService', ['buscarComFiltros', 'contarTotalGeral']);
+    clienteServiceSpy.buscarComFiltros.and.returnValue(of({ clientes: [], total: 0 }));
+    clienteServiceSpy.contarTotalGeral.and.returnValue(of(0));
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
