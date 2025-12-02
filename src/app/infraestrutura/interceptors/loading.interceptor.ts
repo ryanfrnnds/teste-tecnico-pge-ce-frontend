@@ -23,13 +23,10 @@ export class LoadingInterceptor implements HttpInterceptor {
   }
 
   private deveControlarLoading(request: HttpRequest<unknown>): boolean {
-    // Não controla loading se o header X-Skip-Loading estiver presente
     if (request.headers.has('X-Skip-Loading')) {
       return false;
     }
 
-    // Controla loading apenas para requisições que começam com /api
-    // Isso evita interferir com carregamento de assets, imagens, etc.
     return request.url.startsWith('/api');
   }
 }

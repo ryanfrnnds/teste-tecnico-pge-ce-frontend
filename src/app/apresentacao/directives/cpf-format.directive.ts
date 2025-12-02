@@ -28,7 +28,6 @@ export class EmailFormatDirective implements OnInit, OnChanges {
     }
 
     if (mascarado) {
-      // Email mascarado: l****.a****@exemplo.com
       const partes = valor.split('@');
       if (partes.length === 2) {
         const nome = partes[0];
@@ -39,7 +38,6 @@ export class EmailFormatDirective implements OnInit, OnChanges {
           const resto = nome.slice(1);
           const nomeMascarado = primeiraLetra + '****';
 
-          // Se tem ponto no nome, mascara também após o ponto
           const partesNome = nome.split('.');
           if (partesNome.length > 1) {
             const primeiraParte = partesNome[0];
@@ -64,7 +62,6 @@ export class EmailFormatDirective implements OnInit, OnChanges {
   @Input()
   set emailMascarado(value: boolean) {
     this.mascarado = value;
-    // Reaplica a formatação com a nova configuração
     if (this.ultimoValor) {
       this.updateContent(this.ultimoValor);
     }
@@ -88,21 +85,18 @@ export class EmailFormatDirective implements OnInit, OnChanges {
   ngOnInit() {
     const element = this.elementRef.nativeElement;
 
-    // Para elementos não-input (como spans na tabela), configura observação de mudanças
     if (element.tagName !== 'INPUT' && element.tagName !== 'TEXTAREA') {
       this.setupContentObserver();
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // Se recebeu valor via @Input, processa
     if (changes['email'] && changes['email'].currentValue) {
       this.updateContent(changes['email'].currentValue);
     }
   }
 
   private setupContentObserver() {
-    // Usa MutationObserver para detectar mudanças no textContent
     const element = this.elementRef.nativeElement;
 
     if (typeof MutationObserver !== 'undefined') {
@@ -124,7 +118,6 @@ export class EmailFormatDirective implements OnInit, OnChanges {
       });
     }
 
-    // Fallback: tenta processar após um pequeno delay
     setTimeout(() => {
       const textContent = element.textContent?.trim();
       if (textContent && !element.hasAttribute('data-formatted')) {
@@ -146,7 +139,6 @@ export class EmailFormatDirective implements OnInit, OnChanges {
 
     this.renderer.setProperty(element, 'textContent', formatted);
     this.renderer.setAttribute(element, 'data-formatted', 'true');
-    // Adiciona atributo para tooltip mostrar valor completo apenas se hoverRevela for true
     if (this.hoverRevela) {
       this.renderer.setAttribute(element, 'data-tooltip', EmailFormatDirective.formatarEmail(value, false));
     } else {
@@ -180,7 +172,6 @@ export class CpfFormatDirective implements OnInit, OnChanges {
     }
 
     if (mascarado) {
-      // CPF mascarado: ***.***.***-10
       return `***.***.***-${digitos.slice(9)}`;
     }
 
@@ -194,7 +185,6 @@ export class CpfFormatDirective implements OnInit, OnChanges {
   @Input()
   set cpfMascarado(value: boolean) {
     this.mascarado = value;
-    // Reaplica a formatação com a nova configuração
     if (this.ultimoValor) {
       this.updateContent(this.ultimoValor);
     }
@@ -220,7 +210,6 @@ export class CpfFormatDirective implements OnInit, OnChanges {
   ngOnInit() {
     const element = this.elementRef.nativeElement;
 
-    // Verifica se é um componente PrimeNG complexo
     const isPrimeComponent = this.isPrimeNGComponent(element);
 
     this.isInputElement = element.tagName === 'INPUT' ||
@@ -231,14 +220,11 @@ export class CpfFormatDirective implements OnInit, OnChanges {
     if (this.isInputElement && !isPrimeComponent) {
       this.setupInputElement();
     } else if (!this.isInputElement) {
-      // Para elementos não-input (como spans na tabela), configura observação de mudanças
       this.setupContentObserver();
     }
-    // Para componentes PrimeNG, não faz nada - deixa o componente gerenciar
   }
 
   private isPrimeNGComponent(element: any): boolean {
-    // Verifica se o elemento ou seus pais são componentes PrimeNG
     let current = element;
     while (current) {
       if (current.classList?.contains('p-autocomplete') ||
@@ -253,14 +239,12 @@ export class CpfFormatDirective implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // Se recebeu valor via @Input, processa
     if (changes['cpf'] && changes['cpf'].currentValue) {
       this.updateContent(changes['cpf'].currentValue);
     }
   }
 
   private setupContentObserver() {
-    // Usa MutationObserver para detectar mudanças no textContent
     const element = this.elementRef.nativeElement;
 
     if (typeof MutationObserver !== 'undefined') {
@@ -282,7 +266,6 @@ export class CpfFormatDirective implements OnInit, OnChanges {
       });
     }
 
-    // Fallback: tenta processar após um pequeno delay
     setTimeout(() => {
       const textContent = element.textContent?.trim();
       if (textContent && !element.hasAttribute('data-formatted')) {
@@ -294,7 +277,6 @@ export class CpfFormatDirective implements OnInit, OnChanges {
   private setupInputElement() {
     const element = this.elementRef.nativeElement;
 
-    // Formata durante a digitação
     this.renderer.listen(element, 'input', (event) => {
       const input = event.target as HTMLInputElement;
       const rawValue = input.value.replace(/\D/g, '');
@@ -305,7 +287,6 @@ export class CpfFormatDirective implements OnInit, OnChanges {
       }
     });
 
-    // Processa valor inicial se houver
     if (element.value) {
       const formattedValue = this.formatCpf(element.value);
       if (element.value !== formattedValue) {
@@ -336,7 +317,6 @@ export class CpfFormatDirective implements OnInit, OnChanges {
     } else {
       this.renderer.setProperty(element, 'textContent', formatted);
       this.renderer.setAttribute(element, 'data-formatted', 'true');
-      // Adiciona atributo para tooltip mostrar valor completo apenas se hoverRevela for true
       if (this.hoverRevela) {
         this.renderer.setAttribute(element, 'data-tooltip', CpfFormatDirective.formatarCpf(value, false));
       } else {

@@ -19,7 +19,6 @@ export class ListaClientesStore {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  // Estado reativo com signals
   readonly clientes = signal<Cliente[]>([]);
   readonly paginaAtual = signal(0);
   readonly registrosPorPagina = signal(10);
@@ -28,13 +27,11 @@ export class ListaClientesStore {
   readonly modalExclusaoVisible = signal(false);
   readonly clienteParaExcluir = signal<Cliente | null>(null);
 
-  // Formulário reativo
   readonly filtrosForm = this.fb.group({
     nome: [''],
     cidade: ['']
   });
 
-  // Signal derivado dos filtros do formulário (com debounce)
   private readonly filtrosSignal = toSignal(
     this.filtrosForm.valueChanges.pipe(
       debounceTime(500),
@@ -43,7 +40,6 @@ export class ListaClientesStore {
     { initialValue: this.filtrosForm.getRawValue() }
   );
 
-  // Computed signals
   readonly paginatorState = computed(() => {
     const first = this.paginaAtual();
     const rows = this.registrosPorPagina();
@@ -61,7 +57,6 @@ export class ListaClientesStore {
   readonly contagemAtivos = signal(0);
   readonly contagemInativos = signal(0);
 
-  // Novo signal para controlar o total absoluto de registros no banco
   readonly totalGeralSistema = signal(0);
 
   readonly carregando$ = this.loadingService.carregando;
@@ -83,7 +78,6 @@ export class ListaClientesStore {
     Array(this.registrosPorPagina()).fill(0)
   );
 
-  // Effects para reações automáticas
   constructor() {
     const snapshotParams = this.route.snapshot.queryParams;
     const hasUrlState = this.hasAnyQueryParam(snapshotParams);
@@ -115,7 +109,6 @@ export class ListaClientesStore {
       });
     }
 
-    // 2) Atualizar query params sempre que o estado mudar
     effect(() => {
       const pagina = this.paginaAtual();
       const limite = this.registrosPorPagina();
@@ -145,7 +138,6 @@ export class ListaClientesStore {
       });
     }, { allowSignalWrites: true });
 
-    // 3) Buscar clientes sempre que filtros, página, limite ou status mudarem
     effect(async () => {
       const pagina = this.paginaAtual();
       const limite = this.registrosPorPagina();
@@ -191,11 +183,9 @@ export class ListaClientesStore {
       if (typeof window === 'undefined') return;
       window.sessionStorage.setItem(CLIENTES_QUERY_STORAGE_KEY, JSON.stringify(params));
     } catch {
-      // ignore storage errors
     }
   }
 
-  // Métodos públicos da store
   async buscarClientes(filtrosParciais?: {
     nome?: string;
     cidade?: string;
@@ -231,12 +221,11 @@ export class ListaClientesStore {
 
   async buscarContagensTotais(): Promise<void> {
     try {
-      // Buscar todos os registros filtrados (sem paginação) para contar
       const filtros = {
         nome: this.filtrosForm.value.nome || undefined,
         cidade: this.filtrosForm.value.cidade || undefined,
-        status: 'todos' as const, // Sempre buscar todos para contar ativos/inativos
-        pagina: undefined, // Sem paginação para obter todos os registros filtrados
+        status: 'todos' as const, 
+        pagina: undefined, 
         limite: undefined
       };
 
@@ -244,7 +233,6 @@ export class ListaClientesStore {
         this.clienteService.buscarComFiltros(filtros)
       );
 
-      // Contar baseado nos registros filtrados
       this.contagemTotal.set(resultado.clientes.length);
       this.contagemAtivos.set(resultado.clientes.filter(c => c.ativo === true).length);
       this.contagemInativos.set(resultado.clientes.filter(c => c.ativo === false).length);
@@ -259,7 +247,6 @@ export class ListaClientesStore {
 
   async buscarTotalGeralSistema(): Promise<void> {
     try {
-       // Busca o total real do banco de forma otimizada
        const total = await firstValueFrom(this.clienteService.contarTotalGeral());
        this.totalGeralSistema.set(total);
     } catch (erro) {

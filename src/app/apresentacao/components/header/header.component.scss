@@ -11,8 +11,6 @@
   z-index: var(--pge-z-index-sticky);
 }
 
-/* Garante que os botões do HEADER sejam sempre visíveis e legíveis sobre o fundo escuro,
-   independente do tema claro/escuro global */
 .pge-header .p-button.p-button-text {
     color: rgba(255, 255, 255, 0.9) !important;
 }
@@ -31,14 +29,13 @@
   }
 }
 
-/* --- Links de navegação do HEADER (Desktop) --- */
 .pge-header-nav-link {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.9rem;
   border-radius: var(--pge-border-radius-md);
-  color: rgba(255, 255, 255, 0.85) !important; /* Force white text on header */
+  color: rgba(255, 255, 255, 0.85) !important;
   text-decoration: none;
   font-weight: var(--pge-font-weight-medium);
   transition: background-color var(--pge-transition-fast),
@@ -56,16 +53,10 @@
   font-weight: var(--pge-font-weight-bold);
 }
 
-/* --- Links de navegação TABS (Mobile/Abaixo do header) --- */
 .pge-header-mobile-tabs {
   position: sticky;
-  top: 3.25rem; /* header height approx */
+  top: 3.25rem; 
   z-index: calc(var(--pge-z-index-sticky) - 1);
-  /* 
-     Use surface-ground or specific color that guarantees visibility in light mode.
-     The variable --pge-surface-card might be undefined or transparent. 
-     Let's force a background color that works for the theme.
-  */
   background-color: var(--pge-neutral-50); 
   border-bottom: 1px solid var(--pge-neutral-200);
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -82,13 +73,11 @@
   font-weight: var(--pge-font-weight-medium);
   transition: all var(--pge-transition-fast);
   
-  /* Explicit color for visibility in light mode */
-  color: #495057; /* Fallback dark gray */
+  color: #495057;
   color: var(--pge-neutral-700); 
   background-color: transparent;
 }
 
-/* Dark mode override for tabs container and links */
 :host-context(.my-app-dark) .pge-header-mobile-tabs {
     background-color: var(--pge-neutral-100);
     border-bottom-color: var(--pge-neutral-300);
@@ -100,7 +89,7 @@
 
 .pge-header-tab-link:hover {
   color: var(--pge-primary-green);
-  background-color: rgba(0, 0, 0, 0.05); /* Neutral hover */
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 :host-context(.my-app-dark) .pge-header-tab-link:hover {
@@ -108,7 +97,7 @@
 }
 
 .pge-header-tab-link.active {
-  color: white !important; /* Force white text no matter the theme */
+  color: white !important;
   background-color: var(--pge-primary-green);
   font-weight: var(--pge-font-weight-semibold);
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);

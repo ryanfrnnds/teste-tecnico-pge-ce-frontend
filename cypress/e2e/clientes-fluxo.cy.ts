@@ -1,17 +1,32 @@
+const API_LOGIN = '/api/auth/login';
+
+function mockLogin() {
+  cy.intercept('POST', API_LOGIN, {
+    statusCode: 200,
+    body: {
+      token: 'fake-token',
+      user: {
+        id: 1,
+        username: 'admin',
+        name: 'Administrador'
+      }
+    }
+  }).as('login');
+}
+
 describe('Fluxo Completo de Clientes', () => {
   beforeEach(() => {
-    // Limpa o banco de dados antes de cada teste para garantir isolamento
-    // Supondo que exista um comando ou endpoint para resetar o banco, ou fazendo via UI se implementado
-    // Como implementamos o botão de limpar dados em DEV, poderíamos usar ele, mas aqui vamos assumir um estado limpo ou isolado
     cy.viewport(1920, 1080);
+    mockLogin();
   });
 
   it('Deve criar, editar e excluir um cliente com sucesso', () => {
     // 1. Login
-    cy.visit('/auth/login');
-    cy.get('input[formControlName="email"]').type('admin@pge.ce.gov.br');
-    cy.get('input[formControlName="password"]').type('admin123');
+    cy.visit('/login');
+    cy.get('input[formControlName="username"]').type('admin');
+    cy.get('#password input').type('admin');
     cy.get('button[type="submit"]').click();
+    cy.wait('@login');
     cy.url().should('include', '/clientes');
 
     // 2. Navegar para Novo Cliente
@@ -72,11 +87,12 @@ describe('Fluxo Completo de Clientes', () => {
   });
 
   it('Deve validar campos obrigatórios no formulário', () => {
-    cy.visit('/auth/login');
-    cy.get('input[formControlName="email"]').type('admin@pge.ce.gov.br');
-    cy.get('input[formControlName="password"]').type('admin123');
+    cy.visit('/login');
+    cy.get('input[formControlName="username"]').type('admin');
+    cy.get('#password input').type('admin');
     cy.get('button[type="submit"]').click();
-    
+    cy.wait('@login');
+
     cy.get('button[label="Novo Cliente"]').click();
     
     // Tentar salvar sem preencher nada

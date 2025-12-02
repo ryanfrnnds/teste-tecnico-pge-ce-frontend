@@ -2,6 +2,47 @@
 
 Este projeto é a solução proposta para o desafio técnico de Front-End, consistindo em um Sistema de Gestão de Clientes com autenticação e registro de logs. O meu objetivo principal foi demonstrar proficiência nas versões mais recentes do Angular (17+), padrões de arquitetura limpa e estratégias robustas de teste.
 
+Mais do que “só” entregar o CRUD, encarei esse teste como um **estudo guiado** para experimentar o “Angular novo” (standalone, signals, stores locais, interceptors mais inteligentes) em contraste com o jeito “antigo” de organizar projetos.  
+Comecei estruturando o código de um jeito mais tradicional e, aos poucos, fui migrando para o estilo moderno, mantendo uma estrutura de pastas mais “acadêmica” justamente para enxergar com clareza as camadas da arquitetura.
+
+Hoje o projeto está organizado em camadas (`apresentacao`, `negocio`, `dominio`, `infraestrutura`) porque isso me ajudou a raciocinar sobre responsabilidades, mas tenho total consciência de que, no dia a dia, a comunidade Angular tende a preferir uma organização mais voltada a features.
+Se eu fosse iniciar um projeto real do zero, muito provavelmente seguiria algo mais próximo deste padrão:
+
+```text
+src/app/
+  core/
+    guards/
+    interceptors/
+    services/
+    config/
+
+  shared/
+    components/
+    directives/
+    pipes/
+    utils/
+
+  features/
+    clientes/
+      pages/
+      components/
+      services/
+      store/           # NgRx ou Signals Store
+      clientes.routes.ts
+
+    usuarios/
+      pages/
+      components/
+      services/
+      store/
+      usuarios.routes.ts
+
+  app.routes.ts
+  app.component.ts
+```
+
+Ou seja: usei esse teste como sandbox para entender melhor o caminho que o Angular está propondo, e agora consigo transitar com segurança tanto na abordagem “por camadas” quanto na organização “por features”.
+
 ---
 
 ## 🎯 O Desafio
@@ -27,7 +68,6 @@ Adotei uma mentalidade "Docker First" para garantir que o ambiente de execução
 
 Fugi do padrão comum de agrupar tudo por funcionalidades e adotei uma estrutura propositalmente mais "acadêmica" para **evidenciar as camadas da arquitetura** neste teste técnico.
 
-> **Importante:** Essa organização foi adotada para deixar explícito como o frontend pode ser estruturado seguindo princípios de Clean Architecture, mesmo em um projeto Angular.
 
 A estrutura ficou dividida da seguinte forma:
 
@@ -54,6 +94,7 @@ Abandonei a dependência excessiva de subscriptions manuais e `ngOnChanges`:
 - **PrimeFlex (Escolha Pragmática):** Optei pelo PrimeFlex pela produtividade e velocidade de desenvolvimento que ele oferece em um teste técnico. *Nota:* Reconheço que para projetos de médio/longo prazo, a recomendação atual seria o uso de Tailwind CSS ou CSS puro com Grid/Flexbox, visto que o PrimeFlex entrou em modo de manutenção.
 - **SCSS Organizado:** Tentei estruturar o SCSS seguindo as convenções do Angular e PrimeNG, mantendo estilos globais em `styles/` e específicos nos componentes.
 - **PrimeNG:** Utilizado para componentes ricos (Tabelas, Modais), customizados via Tokens de Design.
+- **Uso de `!important`:** Em alguns pontos do SCSS recorri ao `!important` para acelerar ajustes visuais durante o estudo. Eu não considero isso uma boa prática para projetos de longo prazo e, em um cenário real, substituiria por uma hierarquia de estilos mais bem pensada (design tokens, utilitários e sobrescritas bem localizadas).
 
 ### 5. Boas Práticas de Roteamento
 - **Lazy Loading:** Todas as rotas principais são carregadas sob demanda para performance inicial.
@@ -61,6 +102,16 @@ Abandonei a dependência excessiva de subscriptions manuais e `ngOnChanges`:
 - **Resolvers:** Garantem que os dados críticos estejam disponíveis antes do componente ser renderizado, evitando "flickering" de tela vazia.
 
 ---
+
+## 🔒 Dados Pessoais e LGPD
+
+Mesmo sendo um projeto de teste, tratei os dados como se fossem reais, pensando em **boas práticas de privacidade**:
+
+- **Dados mascarados na UI:** E-mails, telefones e CPF são exibidos com máscaras (`MaskEmailPipe`, `MaskPhonePipe`, `MaskCpfPipe`) para evitar exposição desnecessária de dados sensíveis na tela.
+- **Mocks isolados:** O `json-server` usa bases de teste (`db.test.json`) com dados fictícios, evitando qualquer dependência de informações reais.
+- **Logs conscientes:** A camada de logs (`LogService` + `@LogOperation`) registra apenas o necessário para auditoria (quem fez o quê e quando), sem despejar payloads completos ou informações excessivas.
+
+Ou seja, mesmo em um contexto de prova de conceito, a ideia foi sempre aproximar o máximo possível das preocupações que a LGPD exige em produção: minimização de dados, mascaramento quando possível e rastreabilidade sem exposição desnecessária.
 
 ## ✅ Estratégia de Testes
 

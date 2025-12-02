@@ -8,16 +8,20 @@ cd "$PROJECT_ROOT"
 echo "🧪 Executando testes unitários (Karma) em Docker..."
 echo
 
+# Remove container antigo, se existir, para evitar conflito de nome
+if docker ps -a --format '{{.Names}}' | grep -q "^teste-pge-unit$"; then
+  echo "🧹 Removendo container antigo de testes (teste-pge-unit)..."
+  docker rm -f teste-pge-unit >/dev/null 2>&1 || true
+fi
+
 # Garante que as imagens estejam atualizadas
 docker compose -f docker-compose.test.yml build
 
-# Sobe json-server de teste e roda o serviço de testes uma única vez
-docker compose -f docker-compose.test.yml run --rm frontend-test npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
+# Roda os testes em modo watch dentro do container, preso a este terminal.
+# Para sair, basta CTRL+C (isso encerra o processo de testes e o container `frontend-test`).
+docker compose -f docker-compose.test.yml run --name teste-pge-unit frontend-test npm run test -- --browsers=ChromeHeadlessNoSandbox
 
 echo
-echo "🧹 Encerrando ambiente de teste..."
-docker compose -f docker-compose.test.yml down --remove-orphans -v
-
-echo "✅ Testes unitários finalizados."
+echo "✅ Execução de testes unitários encerrada."
 
 

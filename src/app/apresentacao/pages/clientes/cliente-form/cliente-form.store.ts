@@ -61,25 +61,20 @@ export class ClienteFormStore {
     ativo: [true]
   });
 
-  // --- Effects / Reactions ---
   constructor() {
-    // React to Country changes to update validations and state list
     this.form.get('pais')?.valueChanges.subscribe((paisCodigo: string) => {
       this.onPaisChange(paisCodigo);
     });
 
-    // React to Phone changes to update mask
     this.form.get('telefone')?.valueChanges.subscribe(() => {
       this.atualizarTelefoneMask();
     });
 
-    // React to State changes (in address group) to update City list
     this.form.get('endereco.estado')?.valueChanges.subscribe((estadoId) => {
        if (estadoId) this.onEstadoChange(estadoId);
     });
   }
 
-  // --- Actions ---
 
   /**
    * Inicializa o store: carrega listas de localização e, se houver ID, carrega o cliente.
@@ -88,7 +83,6 @@ export class ClienteFormStore {
   init(idCliente: string | null) {
     this.carregando.set(true);
 
-    // Carrega dados de localização primeiro
     forkJoin({
       paises: this.localizacaoService.listarPaises(),
       estados: this.localizacaoService.listarEstados(),
@@ -138,7 +132,6 @@ export class ClienteFormStore {
           cidade: ''
       }
     });
-    // Trigger initial state for new form
     this.onPaisChange('BR'); 
   }
 
@@ -182,13 +175,11 @@ export class ClienteFormStore {
   salvar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      // Marca também como dirty para garantir que as validações que dependem de dirty/touched apareçam
       Object.keys(this.form.controls).forEach(key => {
         const control = this.form.get(key);
         control?.markAsDirty();
         control?.markAsTouched();
         
-        // Se for um FormGroup aninhado (como endereco), percorre seus controles também
         if (control instanceof FormGroup) {
              Object.keys(control.controls).forEach(nestedKey => {
                  const nestedControl = control.get(nestedKey);
@@ -232,7 +223,6 @@ export class ClienteFormStore {
 
     this.carregando.set(true);
 
-    // Usa o Use Case para salvar
     this.manterClienteUseCase.execute(clientePayload, this.modo() === 'edicao')
       .pipe(finalize(() => this.carregando.set(false)))
       .subscribe({
@@ -262,15 +252,11 @@ export class ClienteFormStore {
     const cepControl = enderecoGroup.get('cep');
     if (!cepControl?.value) return;
 
-    // Remove tudo que não é dígito para consulta
     const cepLimpo = (cepControl.value as string).replace(/\D/g, '');
     
-    // Valida tamanho apenas se for BR (8 dígitos)
     if (this.form.get('pais')?.value === 'BR' && cepLimpo.length !== 8) return;
 
-    // Para outros países, talvez não tenhamos busca de CEP implementada,
-    // mas mantemos a lógica segura
-    if (cepLimpo.length < 5) return; // Mínimo razoável
+    if (cepLimpo.length < 5) return; 
 
     this.localizacaoService.buscarCep(cepLimpo).subscribe((lista) => {
       if (!lista || lista.length === 0) return;
@@ -315,7 +301,6 @@ export class ClienteFormStore {
     const telefone = `(11) 9${randomNum(1000, 9999)}-${randomNum(1000, 9999)}`;
     const nascimento = new Date(randomNum(1970, 2000), randomNum(0, 11), randomNum(1, 28));
     
-    // Usar um CEP fixo válido para facilitar
     const cep = '01001-000'; 
     
     this.form.patchValue({
@@ -332,13 +317,12 @@ export class ClienteFormStore {
             numero: randomNum(1, 999).toString(),
             complemento: randomNum(0, 1) ? `Apto ${randomNum(1, 100)}` : '',
             bairro: 'Sé',
-            // Assumindo que BR, SP, São Paulo já estão carregados ou serão carregados pelo buscarCep
             cidade: 'São Paulo', 
-            estado: 2 // ID fictício para SP, o ideal seria buscar na lista de estados carregada
+            estado: 2 
         }
     });
     
-    // Simula a busca de CEP para preencher cidade/estado corretamente se possível
+    
     this.buscarCep();
   }
 
@@ -348,11 +332,11 @@ export class ClienteFormStore {
     if (paisCodigo === 'BR') {
       this.aplicarValidadoresCpfPorPais('BR');
       this.cepMask.set('99.999-999');
-      this.atualizarTelefoneMask(); // Ensure BR mask is set
+      this.atualizarTelefoneMask(); 
     } else {
       this.aplicarValidadoresCpfPorPais('OUTRO');
       this.cepMask.set(null); 
-      this.telefoneMask.set(null); // Remove mask for other countries
+      this.telefoneMask.set(null); 
     }
     
     const paisSelecionado = this.paises().find(p => p.codigo === paisCodigo);

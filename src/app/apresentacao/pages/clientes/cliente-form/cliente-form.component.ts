@@ -37,11 +37,9 @@ export class ClienteFormComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    // Não passamos mais os dados do resolver, apenas o ID
     this.store.init(id);
   }
 
-  // Getters para facilitar uso dos controles no template com a sintaxe @if
   get form() { return this.store.form; }
 
   get nome(): FormControl {
@@ -68,7 +66,6 @@ export class ClienteFormComponent implements OnInit {
     return this.store.form.get('pais') as FormControl;
   }
 
-  // Endereço Controls
   get enderecoGroup(): FormGroup {
     return this.store.form.get('endereco') as FormGroup;
   }

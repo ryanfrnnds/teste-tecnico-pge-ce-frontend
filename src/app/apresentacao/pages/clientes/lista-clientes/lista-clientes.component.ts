@@ -52,7 +52,6 @@ export class ListaClientesComponent {
 
   private readonly store = inject(ListaClientesStore);
 
-  // Expor estado da store para o template
   readonly clientes = this.store.clientes;
   readonly filtrosForm = this.store.filtrosForm;
   readonly paginatorState = this.store.paginatorState;
@@ -77,7 +76,6 @@ export class ListaClientesComponent {
     }
   }
 
-  // Propriedades de apoio para two-way binding com signals
   get modalExclusaoVisibleModel(): boolean {
     return this.modalExclusaoVisible();
   }
@@ -96,7 +94,6 @@ export class ListaClientesComponent {
 
   constructor() {}
 
-  // Métodos públicos - apenas delegam para a store
   aoPesquisar(): void {
     this.store.aplicarFiltros();
   }

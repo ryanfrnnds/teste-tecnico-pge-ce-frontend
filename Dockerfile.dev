@@ -1,7 +1,6 @@
 FROM node:22-alpine
 
-# Instala Chromium para rodar testes do Angular (Karma)
-RUN apk add --no-cache chromium
+RUN apk add --no-cache chromium xvfb
 
 # Define variável de ambiente para o Chrome Binário
 ENV CHROME_BIN=/usr/bin/chromium-browser
@@ -9,10 +8,10 @@ ENV CHROME_BIN=/usr/bin/chromium-browser
 WORKDIR /app
 COPY package*.json ./
 
-# Instala CLI globalmente para garantir execução de comandos ng
 RUN npm install -g @angular/cli
 
-RUN npm install
+RUN npm install \
+ && npx cypress install
 COPY . .
 EXPOSE 4200
 CMD ["npm","run","start"]

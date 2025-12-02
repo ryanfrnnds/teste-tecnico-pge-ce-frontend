@@ -6,16 +6,23 @@ Write-Host "🧪 Executando testes unitários (Karma) em Docker..." -ForegroundC
 Write-Host ""
 
 try {
+    # Remove container antigo, se existir, para evitar conflito de nome
+    $existing = docker ps -a --format "{{.Names}}" | Where-Object { $_ -eq "teste-pge-unit" }
+    if ($existing) {
+        Write-Host "🧹 Removendo container antigo de testes (teste-pge-unit)..." -ForegroundColor Yellow
+        docker rm -f teste-pge-unit | Out-Null
+    }
+
     # Garante que as imagens estejam atualizadas
     docker compose -f docker-compose.test.yml build
 
-    docker compose -f docker-compose.test.yml run --rm frontend-test npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
+    # Roda os testes em modo watch dentro do container, preso a este terminal.
+    # Para sair, basta CTRL+C (isso encerra o processo de testes e o container `frontend-test`).
+    docker compose -f docker-compose.test.yml run --rm frontend-test npm run test -- --browsers=ChromeHeadlessNoSandbox
 }
 finally {
     Write-Host ""
-    Write-Host "🧹 Encerrando ambiente de teste..." -ForegroundColor Yellow
-    docker compose -f docker-compose.test.yml down --remove-orphans -v | Out-Null
-    Write-Host "✅ Testes unitários finalizados." -ForegroundColor Green
+    Write-Host "✅ Execução de testes unitários encerrada." -ForegroundColor Green
 }
 
 
