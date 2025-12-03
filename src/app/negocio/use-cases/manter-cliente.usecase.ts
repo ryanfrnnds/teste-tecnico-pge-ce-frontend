@@ -20,9 +20,6 @@ export class ManterClienteUseCase {
    * @returns Observable com o cliente salvo
    */
   execute(cliente: Cliente, isEdicao: boolean): Observable<Cliente> {
-    // Regra de Negócio: Validação pré-persistência poderia estar aqui
-    // Ex: Verificar duplicação de CPF antes de chamar serviço (se API não fizesse)
-
     if (isEdicao) {
       return this.clienteService.atualizarCliente(cliente);
     } else {

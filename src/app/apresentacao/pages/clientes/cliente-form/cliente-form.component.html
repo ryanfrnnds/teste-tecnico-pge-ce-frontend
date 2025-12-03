@@ -140,9 +140,9 @@
       <div class="col-12 sm:col-6 md:col-2 xl:col-3 field" formGroupName="endereco">
         <p-floatLabel variant="on">
           @if (store.cepMask()) {
-            <p-inputMask id="cep" formControlName="cep" [mask]="store.cepMask()!" styleClass="w-full" class="w-full" (onBlur)="store.buscarCep()"></p-inputMask>
+            <p-inputMask id="cep" formControlName="cep" [mask]="store.cepMask()!" styleClass="w-full" class="w-full"></p-inputMask>
           } @else {
-            <input pInputText id="cep" type="text" formControlName="cep" class="w-full" (blur)="store.buscarCep()" />
+            <input pInputText id="cep" type="text" formControlName="cep" class="w-full" />
           }
           <label for="cep">CEP</label>
         </p-floatLabel>
@@ -200,8 +200,8 @@
 
       <!-- BOTÕES -->
       <div class="col-12 flex justify-content-end gap-2 mt-2 pt-2">
-        <p-button type="submit" [label]="store.modo() === 'novo' ? 'Salvar' : 'Atualizar'" icon="pi pi-save" [loading]="store.carregando()"></p-button>
-        <p-button type="button" label="Cancelar" icon="pi pi-times" styleClass="p-button-outlined p-button-secondary" (onClick)="store.voltarParaLista()"></p-button>
+        <p-button id="btnSalvar" type="submit" [label]="store.modo() === 'novo' ? 'Salvar' : 'Atualizar'" icon="pi pi-save" [loading]="store.carregando()"></p-button>
+        <p-button id="btnCancelar" type="button" label="Cancelar" icon="pi pi-times" styleClass="p-button-outlined p-button-secondary" (onClick)="store.voltarParaLista()"></p-button>
       </div>
     </form>
   </p-card>

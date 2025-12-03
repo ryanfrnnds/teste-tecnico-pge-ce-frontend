@@ -1,8 +1,48 @@
+/**
+ * @description
+ * `ListaClientesStore` é o *Store* responsável por gerenciar todo o estado
+ * e o comportamento da tela de listagem de clientes.
+ *
+ * ## 📦 O que é o STORE aqui?
+ * Este Store centraliza:
+ * - Estados de listagem: clientes, paginação, filtros, seleção, status.
+ * - Regras de interação da UI: mudar página, aplicar filtros, limpar filtros,
+ *   ativar/inativar em massa, navegar para edição/novo cliente.
+ * - Sincronização de estado com a URL (query params) e sessionStorage,
+ *   permitindo que o usuário volte ao mesmo estado ao recarregar a página
+ *   ou navegar de/para a tela.
+ * - Coordenação de chamadas para serviços (ClienteService, LoadingService)
+ *   e exibição de mensagens de feedback (MessageService).
+ *
+ * O componente de UI consome apenas os signals/computed e chama métodos
+ * públicos desse Store, mantendo o component mais simples e declarativo.
+ *
+ * ## 📄 O que são os STATES aqui?
+ * Nesta classe, **states** são:
+ * - Signals de dados: `clientes`, `paginaAtual`, `registrosPorPagina`,
+ *   `filtroStatus`, `clientesSelecionados`, `modalExclusaoVisible`,
+ *   `clienteParaExcluir`, `totalRegistrosFiltrados`, `contagemTotal`,
+ *   `contagemAtivos`, `contagemInativos`, `totalGeralSistema`.
+ * - Signals derivados (`computed`): `paginatorState`, `listaVaziaSemFiltros`,
+ *   `nenhumClienteCadastrado`, `modoReativacao`, `skeletonArray`.
+ * - Estados de formulário: `filtrosForm` (Reactive Form) e o `filtrosSignal`
+ *   derivado de `valueChanges`.
+ * - Estado reativo de carregamento: `carregando$`, exposto pelo `LoadingService`.
+ *
+ * Esses states representam o *estado atual da tela de lista* e são
+ * atualizados pelos métodos do Store. A UI reage automaticamente às mudanças.
+ *
+ * ## 🧩 Resumo
+ * - O Store: classe `ListaClientesStore` como container de estado + lógica da tela.
+ * - Os States: todos os signals/computed, o formulário reativo e o stream
+ *   de carregamento que descrevem como a tela está em cada momento.
+ */
+
 import { Injectable, computed, signal, effect, inject } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
-import { firstValueFrom, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
+import { firstValueFrom, debounceTime, distinctUntilChanged } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Cliente } from '@dominio/models/cliente.model';
 import { ClienteService } from '@infraestrutura/services/cliente.service';
@@ -144,7 +184,7 @@ export class ListaClientesStore {
       const status = this.filtroStatus();
       const filtros = this.filtrosSignal();
 
-      this.loadingService.iniciar(); // Ensure loading starts
+      this.loadingService.iniciar();
       try {
         await this.buscarClientes({
           nome: filtros?.nome || undefined,
@@ -224,8 +264,8 @@ export class ListaClientesStore {
       const filtros = {
         nome: this.filtrosForm.value.nome || undefined,
         cidade: this.filtrosForm.value.cidade || undefined,
-        status: 'todos' as const, 
-        pagina: undefined, 
+        status: 'todos' as const,
+        pagina: undefined,
         limite: undefined
       };
 
@@ -247,11 +287,11 @@ export class ListaClientesStore {
 
   async buscarTotalGeralSistema(): Promise<void> {
     try {
-       const total = await firstValueFrom(this.clienteService.contarTotalGeral());
-       this.totalGeralSistema.set(total);
+      const total = await firstValueFrom(this.clienteService.contarTotalGeral());
+      this.totalGeralSistema.set(total);
     } catch (erro) {
-       console.error('Erro ao buscar total geral do sistema', erro);
-       this.totalGeralSistema.set(0);
+      console.error('Erro ao buscar total geral do sistema', erro);
+      this.totalGeralSistema.set(0);
     }
   }
 
@@ -300,7 +340,7 @@ export class ListaClientesStore {
       await this.buscarTotalGeralSistema();
       this.modalExclusaoVisible.set(false);
 
-    } catch (erro) {
+    } catch {
       this.messageService.add({
         severity: 'error',
         summary: 'Erro',
@@ -329,7 +369,7 @@ export class ListaClientesStore {
       await this.buscarTotalGeralSistema();
       this.modalExclusaoVisible.set(false);
 
-    } catch (erro) {
+    } catch {
       this.messageService.add({
         severity: 'error',
         summary: 'Erro',
@@ -368,9 +408,9 @@ export class ListaClientesStore {
 
     try {
       if (novoStatusAtivo) {
-         await firstValueFrom(this.clienteService.atualizar(cliente.id, { ativo: true }));
+        await firstValueFrom(this.clienteService.atualizar(cliente.id, { ativo: true }));
       } else {
-         await firstValueFrom(this.clienteService.excluir(cliente.id));
+        await firstValueFrom(this.clienteService.excluir(cliente.id));
       }
 
       this.messageService.add({
@@ -408,23 +448,23 @@ export class ListaClientesStore {
   async inserirClientesTeste(): Promise<void> {
     this.loadingService.iniciar();
     try {
-        await firstValueFrom(this.clienteService.popularMockClientes());
-        await this.buscarClientes();
-        await this.buscarContagensTotais();
-        await this.buscarTotalGeralSistema();
-        this.messageService.add({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Clientes de teste inseridos com sucesso'
-        });
-    } catch (err) {
-         this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Erro ao inserir clientes de teste'
-        });
+      await firstValueFrom(this.clienteService.popularMockClientes());
+      await this.buscarClientes();
+      await this.buscarContagensTotais();
+      await this.buscarTotalGeralSistema();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Clientes de teste inseridos com sucesso'
+      });
+    } catch {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Erro ao inserir clientes de teste'
+      });
     } finally {
-        this.loadingService.finalizar();
+      this.loadingService.finalizar();
     }
   }
 }

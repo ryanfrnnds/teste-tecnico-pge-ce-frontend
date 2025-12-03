@@ -1,3 +1,33 @@
+/**
+ * @description
+ * `ClienteFormStore` é o *Store* responsável por gerenciar todo o estado
+ * e comportamento da tela de cadastro/edição de clientes.
+ * 
+ * ## 📦 O que é um STORE?
+ * Um Store é uma camada que centraliza:
+ * - Estados da tela (signals, computed e form)
+ * - Regras de interação (troca de país, estado, CEP, masks)
+ * - Coordenação do fluxo da UI (init, salvar, voltar)
+ * - Chamadas para casos de uso e serviços externos
+ * 
+ * Ele organiza dados e ações de maneira reativa, deixando o componente limpo.
+ * A UI apenas consome sinais e chama métodos públicos do Store.
+ *
+ * ## 📄 O que são STATES?
+ * Nesta classe, **states** são:
+ * - Signals (`modo`, `carregando`, `paises`, `estados`, etc.)
+ * - Signals derivados (`titulo`)
+ * - Estados de formulário (`form: FormGroup`) esse state 
+ * 
+ * Esses estados representam o *estado atual da tela*.
+ * Quando alterados, disparam atualização automática na UI.
+ *
+ * ## 🧩 Resumo
+ * - O Store é o **container** do estado e lógica da tela.
+ * - Os States são **os dados reativos em si**.
+ * - O componente apenas renderiza e delega ações ao Store.
+ */
+
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -22,26 +52,23 @@ export class ClienteFormStore {
   private readonly localizacaoService = inject(LocalizacaoService);
   private readonly manterClienteUseCase = inject(ManterClienteUseCase);
 
-  // --- State Signals ---
   readonly modo = signal<ModoFormulario>('novo');
   readonly carregando = signal<boolean>(false);
   readonly paises = signal<Pais[]>([]);
   readonly estados = signal<Estado[]>([]);
   readonly municipios = signal<Municipio[]>([]);
   
-  // Derived UI Signals
-  readonly titulo = computed(() => 
+  readonly titulo = computed(() =>
     this.modo() === 'novo' ? 'Novo Cliente' : 'Editar Cliente'
   );
 
   readonly estadosFiltrados = signal<Estado[]>([]);
   readonly municipiosFiltrados = signal<Municipio[]>([]);
-  readonly telefoneMask = signal<string | null>('(99) 9999-9999'); // Default BR mask
+  readonly telefoneMask = signal<string | null>('(99) 9999-9999');
   readonly cepMask = signal<string | null>(null);
 
-  // --- Form Definition ---
   readonly form: FormGroup = this.fb.group({
-    id: [''], // Hidden field for ID
+    id: [''],
     nome: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
     cpf: [''],
@@ -71,15 +98,10 @@ export class ClienteFormStore {
     });
 
     this.form.get('endereco.estado')?.valueChanges.subscribe((estadoId) => {
-       if (estadoId) this.onEstadoChange(estadoId);
+      if (estadoId) this.onEstadoChange(estadoId);
     });
   }
 
-
-  /**
-   * Inicializa o store: carrega listas de localização e, se houver ID, carrega o cliente.
-   * @param idCliente ID opcional para edição
-   */
   init(idCliente: string | null) {
     this.carregando.set(true);
 
@@ -110,8 +132,7 @@ export class ClienteFormStore {
           this.inicializarFormularioNovo();
         }
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
@@ -128,8 +149,8 @@ export class ClienteFormStore {
       tipoContato: 'Whatsapp',
       ativo: true,
       endereco: {
-          estado: '',
-          cidade: ''
+        estado: '',
+        cidade: ''
       }
     });
     this.onPaisChange('BR'); 
@@ -181,11 +202,11 @@ export class ClienteFormStore {
         control?.markAsTouched();
         
         if (control instanceof FormGroup) {
-             Object.keys(control.controls).forEach(nestedKey => {
-                 const nestedControl = control.get(nestedKey);
-                 nestedControl?.markAsDirty();
-                 nestedControl?.markAsTouched();
-             });
+          Object.keys(control.controls).forEach(nestedKey => {
+            const nestedControl = control.get(nestedKey);
+            nestedControl?.markAsDirty();
+            nestedControl?.markAsTouched();
+          });
         }
       });
 
@@ -194,6 +215,7 @@ export class ClienteFormStore {
         summary: 'Formulário incompleto',
         detail: 'Verifique os campos destacados antes de continuar.'
       });
+      return;
     }
 
     const valor = this.form.getRawValue();
@@ -236,8 +258,7 @@ export class ClienteFormStore {
           });
           this.router.navigate(['/clientes']);
         },
-        error: (err) => {
-          console.error(err);
+        error: () => {
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
@@ -247,41 +268,6 @@ export class ClienteFormStore {
       });
   }
 
-  buscarCep(): void {
-    const enderecoGroup = this.form.get('endereco') as FormGroup;
-    const cepControl = enderecoGroup.get('cep');
-    if (!cepControl?.value) return;
-
-    const cepLimpo = (cepControl.value as string).replace(/\D/g, '');
-    
-    if (this.form.get('pais')?.value === 'BR' && cepLimpo.length !== 8) return;
-
-    if (cepLimpo.length < 5) return; 
-
-    this.localizacaoService.buscarCep(cepLimpo).subscribe((lista) => {
-      if (!lista || lista.length === 0) return;
-
-      const cepInfo = lista[0];
-      const municipio = this.municipios().find(m => m.id === cepInfo.municipioId);
-      if (!municipio) return;
-
-      const estado = this.estados().find(e => e.id === municipio.estadoId);
-      if (!estado) return;
-
-      const pais = this.paises().find(p => p.id === estado.paisId);
-      if (!pais) return;
-
-      this.form.patchValue({
-        pais: pais.codigo,
-        endereco: {
-          cidade: municipio.nome,
-          estado: estado.id,
-          bairro: cepInfo.bairro,
-          logradouro: cepInfo.logradouro
-        }
-      });
-    });
-  }
 
   voltarParaLista(): void {
     this.router.navigate(['/clientes']);
@@ -304,29 +290,24 @@ export class ClienteFormStore {
     const cep = '01001-000'; 
     
     this.form.patchValue({
-        nome,
-        email,
-        cpf,
-        dataNascimento: nascimento,
-        tipoContato: randomItem(tiposContato),
-        telefone,
-        pais: 'BR',
-        endereco: {
-            cep,
-            logradouro: 'Praça da Sé',
-            numero: randomNum(1, 999).toString(),
-            complemento: randomNum(0, 1) ? `Apto ${randomNum(1, 100)}` : '',
-            bairro: 'Sé',
-            cidade: 'São Paulo', 
-            estado: 2 
-        }
+      nome,
+      email,
+      cpf,
+      dataNascimento: nascimento,
+      tipoContato: randomItem(tiposContato),
+      telefone,
+      pais: 'BR',
+      endereco: {
+        cep,
+        logradouro: 'Praça da Sé',
+        numero: randomNum(1, 999).toString(),
+        complemento: randomNum(0, 1) ? `Apto ${randomNum(1, 100)}` : '',
+        bairro: 'Sé',
+        cidade: 'São Paulo',
+        estado: 2 
+      }
     });
-    
-    
-    this.buscarCep();
   }
-
-  // --- Helper Methods ---
 
   private onPaisChange(paisCodigo: string): void {
     if (paisCodigo === 'BR') {
@@ -335,8 +316,8 @@ export class ClienteFormStore {
       this.atualizarTelefoneMask(); 
     } else {
       this.aplicarValidadoresCpfPorPais('OUTRO');
-      this.cepMask.set(null); 
-      this.telefoneMask.set(null); 
+      this.cepMask.set(null);
+      this.telefoneMask.set(null);
     }
     
     const paisSelecionado = this.paises().find(p => p.codigo === paisCodigo);
@@ -352,20 +333,20 @@ export class ClienteFormStore {
 
     const currentEstado = this.form.get('endereco.estado')?.value;
     if (currentEstado && !estadosDoPais.find(e => e.id === currentEstado)) {
-        this.form.get('endereco.estado')?.setValue('');
-        this.form.get('endereco.cidade')?.setValue('');
-        this.municipiosFiltrados.set([]);
+      this.form.get('endereco.estado')?.setValue('');
+      this.form.get('endereco.cidade')?.setValue('');
+      this.municipiosFiltrados.set([]);
     }
   }
 
   private onEstadoChange(estadoId: any): void {
-    const estadoIdNum = Number(estadoId); 
+    const estadoIdNum = Number(estadoId);
     const municipiosDoEstado = this.municipios().filter(m => m.estadoId === estadoIdNum);
     this.municipiosFiltrados.set(municipiosDoEstado);
     
     const currentCity = this.form.get('endereco.cidade')?.value;
     if (currentCity && !municipiosDoEstado.find(m => m.nome === currentCity)) {
-        this.form.get('endereco.cidade')?.setValue('');
+      this.form.get('endereco.cidade')?.setValue('');
     }
   }
 
@@ -384,19 +365,17 @@ export class ClienteFormStore {
   private atualizarTelefoneMask(): void {
     const pais = this.form.get('pais')?.value;
     if (pais !== 'BR') {
-        this.telefoneMask.set(null);
-        return;
+      this.telefoneMask.set(null);
+      return;
     }
 
     const telefoneControl = this.form.get('telefone');
     if (!telefoneControl) return;
 
     const digits = (telefoneControl.value || '').replace(/\D/g, '');
-    if (digits.length > 10) {
-      this.telefoneMask.set('(99) 9 9999-9999');
-    } else {
-      this.telefoneMask.set('(99) 9999-9999');
-    }
+    this.telefoneMask.set(
+      digits.length > 10 ? '(99) 9 9999-9999' : '(99) 9999-9999'
+    );
   }
 
   private obterCodigoPaisPorNome(nome: string): string {
@@ -408,4 +387,3 @@ export class ClienteFormStore {
     return `cli-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
   }
 }
-

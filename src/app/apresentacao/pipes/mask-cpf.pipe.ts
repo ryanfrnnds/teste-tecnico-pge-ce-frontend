@@ -24,7 +24,6 @@ export class MaskCpfPipe implements PipeTransform {
       return value;
     }
 
-    // CPF mascarado: ***.***.***-10
     return `***.***.***-${digitos.slice(9)}`;
   }
 

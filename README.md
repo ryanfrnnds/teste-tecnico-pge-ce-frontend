@@ -59,12 +59,16 @@ O foco não foi apenas "fazer funcionar", mas estruturar uma aplicação escalá
 
 Para atender aos requisitos com excelência, adotei diversas decisões estratégicas:
 
-### 1. Abordagem "Docker First"
-Adotei uma mentalidade "Docker First" para garantir que o ambiente de execução seja idêntico para todos os desenvolvedores, independentemente do sistema operacional (Windows, Linux, Mac).
-- **Consistência:** Eliminei o famoso "na minha máquina funciona". O ambiente é containerizado, garantindo versões exatas de Node.js, Nginx e dependências.
-- **Facilidade:** Com um único comando, subo toda a infraestrutura necessária (Frontend + Backend Mock), sem a necessidade de instalar ferramentas complexas localmente além do Docker.
+### ~~1. Abordagem "Docker First"~~ (Deprecado)
 
-### 2. Arquitetura em Camadas e Organização das Pastas
+~~Adotei uma mentalidade "Docker First" para garantir que o ambiente de execução seja idêntico para todos os desenvolvedores, independentemente do sistema operacional (Windows, Linux, Mac).~~
+- ~~**Consistência:** Eliminei o famoso "na minha máquina funciona". O ambiente é containerizado, garantindo versões exatas de Node.js, Nginx e dependências.~~
+- ~~**Facilidade:** Com um único comando, subo toda a infraestrutura necessária (Frontend + Backend Mock), sem a necessidade de instalar ferramentas complexas localmente além do Docker.~~
+- ~~**Scripts de automação:** A pasta `scripts/` continha scripts facilitadores (Bash e PowerShell) para executar comandos Docker de forma simplificada (`start.sh`, `test-unit.sh`, `test-e2e.sh`, etc.).~~
+
+**Motivo da deprecação:** Apesar dos testes unitários (Jasmine/Karma) e E2E (Cypress) funcionarem corretamente via terminal em modo headless dentro do Docker, não consegui configurar a abertura dos browsers de forma confiável para visualização interativa. A interface web do Karma e a interface interativa do Cypress Test Runner não funcionaram adequadamente quando executadas dentro de containers Docker, mesmo com configurações de portas e acesso externo. Como a visualização interativa dos testes é importante para revisão e debug, optei por remover o Docker da stack de desenvolvimento. Com isso, a pasta `scripts/` também foi removida, pois seus scripts eram específicos para execução via Docker. *Nota: Caso queira consultar os scripts Docker que foram removidos, eles ainda estão disponíveis nos commits anteriores do repositório.* Agora todos os comandos são executados diretamente via `npm` conforme documentado na seção [🚀 Como Executar Localmente](#-como-executar-localmente). Veja mais detalhes na seção [📝 Decisão sobre Docker](#-decisão-sobre-docker).
+
+### 1. Arquitetura em Camadas e Organização das Pastas
 
 Fugi do padrão comum de agrupar tudo por funcionalidades e adotei uma estrutura propositalmente mais "acadêmica" para **evidenciar as camadas da arquitetura** neste teste técnico.
 
@@ -83,23 +87,166 @@ A estrutura ficou dividida da seguinte forma:
 - **`src/app/infraestrutura` (Camada de Infraestrutura):**
   Implementações técnicas: serviços HTTP, interceptors, guards, resolvers e outros adapters que falam com APIs e recursos externos.
 
-### 3. Reatividade Moderna (Angular 17+)
+#### Diagrama de Camadas e Fluxo de Comunicação
+
+A arquitetura segue o princípio de **dependência unidirecional**, onde camadas superiores dependem apenas de camadas inferiores:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    APRESENTAÇÃO (UI)                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ Components   │  │   Pages      │  │   Stores     │      │
+│  │ Directives   │  │   Pipes      │  │              │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│         │                  │                  │            │
+│         └──────────────────┼──────────────────┘            │
+│                            │                                │
+│                            ▼                                │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            │ usa
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    NEGÓCIO (Use Cases)                       │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  ManterClienteUseCase                                 │  │
+│  │  - Encapsula regras de negócio                        │  │
+│  │  - Orquestra fluxos de aplicação                      │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                            │                                │
+│                            │ usa                            │
+│                            ▼                                │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            │ usa
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  INFRAESTRUTURA (Adapters)                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  Services    │  │ Interceptors │  │   Guards     │     │
+│  │  (HTTP)      │  │  (Auth,      │  │  (Routes)    │     │
+│  │              │  │   Loading)   │  │              │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│         │                  │                  │           │
+│         └──────────────────┼──────────────────┘           │
+│                            │                               │
+│                            │ usa                           │
+│                            ▼                               │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            │ usa
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    DOMÍNIO (Core)                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │   Models     │  │   Enums      │  │ Validators   │     │
+│  │   (Cliente)  │  │   (Status)   │  │  (CPF, Data) │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│                                                            │
+│  ⚠️ SEM dependências de Angular, HTTP ou frameworks        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Regras de Comunicação entre Camadas
+
+**1. Apresentação → Negócio → Infraestrutura → Domínio**
+   - Fluxo principal: A camada de apresentação (Stores) chama Use Cases, que por sua vez utilizam serviços de infraestrutura
+   - **Exemplo prático:**
+     ```typescript
+     // ClienteFormStore (Apresentação)
+     this.manterClienteUseCase.execute(cliente, isEdicao)
+       ↓
+     // ManterClienteUseCase (Negócio)
+     this.clienteService.criar(cliente) ou this.clienteService.atualizarCliente(cliente)
+       ↓
+     // ClienteService (Infraestrutura)
+     this.http.post<Cliente>('/api/clientes', cliente)
+       ↓
+     // Cliente (Domínio) - modelo usado em todas as camadas
+     ```
+
+**2. Domínio é Independente**
+   - A camada de domínio **não depende** de nenhuma outra camada
+   - Contém apenas modelos, enums e validadores puros (sem Angular, sem HTTP)
+   - Pode ser reutilizada em qualquer contexto (web, mobile, backend)
+
+**3. Infraestrutura → Domínio**
+   - Serviços de infraestrutura usam modelos do domínio para tipagem
+   - Interceptors e guards podem usar enums e validadores do domínio
+
+**4. Apresentação → Domínio**
+   - Components e Stores usam modelos e validadores do domínio diretamente
+   - Exemplo: `ClienteFormStore` usa `Cliente` (model) e `cpfBasicoValidator` (validador)
+
+**5. Exceções Práticas**
+   - **Stores podem acessar Infraestrutura diretamente** para casos específicos (ex: `LocalizacaoService` para buscar CEP)
+   - Isso é uma flexibilidade pragmática, mas o ideal é sempre passar por Use Cases quando há regra de negócio
+
+#### Benefícios desta Arquitetura
+
+- **Testabilidade:** Cada camada pode ser testada isoladamente usando mocks das camadas inferiores
+- **Manutenibilidade:** Mudanças em uma camada não afetam outras (ex: trocar API não afeta UI)
+- **Reutilização:** Lógica de negócio e domínio podem ser reutilizadas em diferentes contextos
+- **Clareza:** Fica explícito onde cada responsabilidade deve estar
+
+### 2. Reatividade Moderna (Angular 17+)
 Abandonei a dependência excessiva de subscriptions manuais e `ngOnChanges`:
 - **Signals & Computed:** Usados extensivamente para gerenciamento de estado local e derivado, garantindo renderização fina e performática.
 - **Subjects:** Mantidos apenas onde necessário para compatibilidade ou fluxos de eventos específicos, mas encapsulados.
 - **Formulários Reativos:** Para validações complexas e feedback visual imediato.
 
-### 4. UI/UX e Estilização
+### 3. UI/UX e Estilização
 - **Hierarquia Visual & Padrão de Leitura:** A interface foi desenhada respeitando o padrão ocidental de leitura (esquerda para direita, cima para baixo). Elementos críticos e botões de ação primária ("Salvar", "Login") foram estrategicamente posicionados para serem os primeiros elementos de interação percebidos ou seguirem o fluxo natural de encerramento de formulário.
 - **PrimeFlex (Escolha Pragmática):** Optei pelo PrimeFlex pela produtividade e velocidade de desenvolvimento que ele oferece em um teste técnico. *Nota:* Reconheço que para projetos de médio/longo prazo, a recomendação atual seria o uso de Tailwind CSS ou CSS puro com Grid/Flexbox, visto que o PrimeFlex entrou em modo de manutenção.
 - **SCSS Organizado:** Tentei estruturar o SCSS seguindo as convenções do Angular e PrimeNG, mantendo estilos globais em `styles/` e específicos nos componentes.
 - **PrimeNG:** Utilizado para componentes ricos (Tabelas, Modais), customizados via Tokens de Design.
 - **Uso de `!important`:** Em alguns pontos do SCSS recorri ao `!important` para acelerar ajustes visuais durante o estudo. Eu não considero isso uma boa prática para projetos de longo prazo e, em um cenário real, substituiria por uma hierarquia de estilos mais bem pensada (design tokens, utilitários e sobrescritas bem localizadas).
 
-### 5. Boas Práticas de Roteamento
+### 4. Boas Práticas de Roteamento
 - **Lazy Loading:** Todas as rotas principais são carregadas sob demanda para performance inicial.
 - **Auth Guards:** Proteção de rotas administrativas.
 - **Resolvers:** Garantem que os dados críticos estejam disponíveis antes do componente ser renderizado, evitando "flickering" de tela vazia.
+
+### 5. Padrões e Boas Práticas do Projeto
+
+Este projeto segue um conjunto de padrões e convenções para garantir consistência, manutenibilidade e qualidade do código:
+
+#### Arquitetura em Camadas
+A base arquitetural do projeto é a **separação em camadas** (`apresentacao`, `dominio`, `negocio`, `infraestrutura`), garantindo:
+- **Separação de responsabilidades:** Cada camada tem um propósito bem definido
+- **Baixo acoplamento:** Camadas superiores dependem apenas de abstrações das camadas inferiores
+- **Testabilidade:** Facilita a criação de testes isolados e mocks
+
+#### Inversão de Dependências (Dependency Injection)
+O projeto utiliza extensivamente o sistema de **Dependency Injection (DI)** do Angular:
+- **Serviços injetados via construtor ou `inject()`:** Todos os serviços são fornecidos através do sistema de DI do Angular
+- **Abstrações sobre implementações:** Use Cases dependem de interfaces de serviços, não de implementações concretas
+- **Testabilidade aprimorada:** Facilita a substituição de dependências por mocks em testes
+
+#### Decorators
+Utilizamos decorators para adicionar funcionalidades transversais de forma declarativa:
+- **`@LogOperation`:** Decorator customizado que registra automaticamente operações CRUD no sistema de logs, aplicado em métodos de serviços que retornam Observables
+- **Decorators do Angular:** `@Injectable()`, `@Component()`, `@Pipe()` para definir metadados das classes
+
+#### Documentação de Código
+- **JSDoc para APIs públicas:** Métodos e classes públicas possuem documentação JSDoc quando necessário para explicar comportamento complexo ou não óbvio
+- **Código autoexplicativo:** Priorizamos código claro e expressivo ao invés de comentários desnecessários. Se um comentário é necessário, provavelmente o código pode ser melhorado
+- **Nomes descritivos:** Variáveis, métodos e classes possuem nomes que deixam claro sua intenção
+
+#### Gerenciamento de Estado
+- **Signals para estado local:** Uso de `signal()` e `computed()` para estado reativo local em Stores
+- **Observables para fluxos assíncronos:** RxJS para operações HTTP e eventos de fluxo
+- **Stores locais por feature:** Cada feature possui sua própria Store para gerenciar estado específico
+
+#### Formulários Reativos
+- **Validações centralizadas:** Validators customizados no domínio (`@dominio/validacoes`)
+- **Feedback visual imediato:** Validações síncronas e assíncronas com feedback visual através de classes CSS
+- **Formulários tipados:** Uso de `FormGroup` tipado para garantir type-safety
+
+#### Testes
+- **Testes isolados e atômicos:** Cada teste é independente e não depende de estado externo
+- **Mocks e Spies:** Uso de `jasmine.SpyObj` para mockar dependências
+- **Cobertura de camadas:** Testes unitários para Stores, Services, Use Cases e componentes
 
 ---
 
@@ -130,49 +277,161 @@ A qualidade foi assegurada através de uma pirâmide de testes diversificada, co
 
 ## 🚀 Como Executar Localmente
 
-Preparei scripts para facilitar a execução tanto em Windows (PowerShell) quanto em Linux/Mac (Bash).
-
 ### Pré-requisitos
-- **Docker** e **Docker Compose** instalados e rodando.
 
-### Usando os Scripts de Automação
-Na pasta `scripts/` você encontrará atalhos para as tarefas mais comuns.
+Antes de começar, certifique-se de ter instalado:
 
-#### 1. Iniciar o Projeto (Recomendado)
-Este comando sobe o ambiente completo (Frontend + Mock Backend JSON Server) via Docker.
-- **Windows:** `./scripts/powershell/start.ps1`
-- **Linux/Mac:** `./scripts/bash/start.sh`
+- **Node.js** (versão 18 ou superior) - **Recomendamos usar o NVM (Node Version Manager)** para gerenciar múltiplas versões do Node.js de forma prática e organizada:
+  - **Windows:** [nvm-windows](https://github.com/coreybutler/nvm-windows) - [Download](https://github.com/coreybutler/nvm-windows/releases)
+  - **Linux/Mac:** [nvm](https://github.com/nvm-sh/nvm) - Instalação via curl: `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash`
+  - **Alternativa:** Se preferir, pode instalar diretamente do [site oficial](https://nodejs.org/)
+- **npm** (geralmente vem com o Node.js)
+- **Electron** (vem incluído com o Cypress) - Recomendado para execução dos testes E2E, pois não exibe avisos de senha insegura do Chrome, tornando os testes mais limpos. O Cypress usa Electron por padrão quando você executa `npm run e2e`.
 
-#### 2. Parar o Projeto
-Derruba os containers e libera as portas.
-- **Windows:** `./scripts/powershell/stop.ps1`
-- **Linux/Mac:** `./scripts/bash/stop.sh`
+### Instalação
 
-#### 3. Executar Testes Unitários
-Roda os testes de UI, Store e UseCases (Karma/Jasmine).
-- **Windows:** `./scripts/powershell/test-unit.ps1`
-- **Linux/Mac:** `./scripts/bash/test-unit.sh`
+1. **Clone o repositório** (se ainda não tiver feito):
+   ```bash
+   git clone https://github.com/ryanfrnnds/teste-tecnico-pge-ce-frontend.git
+   cd teste-tecnico-pge-ce-frontend
+   ```
 
-#### 4. Executar Testes E2E
-Roda os testes de fluxo completo (Cypress). *O servidor deve estar rodando.*
-- **Windows:** `./scripts/powershell/test-e2e.ps1`
-- **Linux/Mac:** `./scripts/bash/test-e2e.sh`
+2. **Instale as dependências:**
+   ```bash
+   npm install
+   ```
 
-#### 5. Limpeza Total
-Remove containers, imagens criadas pelo projeto e volumes para garantir uma instalação limpa.
-- **Windows:** `./scripts/powershell/full-remove.ps1`
-- **Linux/Mac:** `./scripts/bash/full-remove.sh`
+### Executando o Projeto
+
+#### Desenvolvimento (Frontend + Backend Mock)
+
+Para iniciar o ambiente de desenvolvimento completo (Angular + JSON Server):
+
+```bash
+npm run start:dev
+```
+
+Este comando irá:
+- Iniciar o servidor Angular em `http://localhost:4200`
+- Iniciar o JSON Server (API Mock) em `http://localhost:3000`
+- Configurar o proxy automaticamente para redirecionar requisições `/api/*` para o JSON Server
+
+**Acesse a aplicação em:** [http://localhost:4200](http://localhost:4200)
+
+#### Executando Serviços Separadamente
+
+Se preferir executar os serviços em terminais separados:
+
+**Terminal 1 - Frontend:**
+```bash
+npm run start
+```
+
+**Terminal 2 - Backend Mock:**
+```bash
+npm run start:json
+```
+
+### Executando Testes
+
+#### Testes Unitários (Karma & Jasmine)
+
+**Executar testes com cobertura de código (padrão):**
+```bash
+npm run test
+```
+
+Este comando irá:
+- Executar todos os testes unitários
+- Gerar relatório de cobertura de código
+- Abrir automaticamente o browser do Karma/Jasmine em `http://localhost:9876` para visualização interativa dos resultados
+
+**Em modo watch (re-executa testes ao alterar arquivos):**
+```bash
+npm run test:watch
+```
+
+**Visualizar relatório de cobertura HTML:**
+
+Após executar os testes, um relatório HTML detalhado de cobertura é gerado na pasta `coverage/teste-pge/`. Para visualizá-lo:
+
+1. **Abrir diretamente no navegador:**
+   - Navegue até a pasta do projeto e abra: `coverage/teste-pge/index.html`
+   - *Nota:* O caminho completo dependerá de onde você clonou o projeto (exemplo: se clonou em `C:\Projetos\teste-pge`, o caminho será `C:\Projetos\teste-pge\coverage\teste-pge\index.html`)
+   - Clique duas vezes no arquivo `index.html` para abrir no navegador padrão
+
+2. **Via terminal (Windows PowerShell):**
+   ```powershell
+   start coverage/teste-pge/index.html
+   ```
+   Ou:
+   ```powershell
+   Invoke-Item coverage/teste-pge/index.html
+   ```
+
+3. **Via terminal (Git Bash):**
+   ```bash
+   start coverage/teste-pge/index.html
+   ```
+
+O relatório HTML mostra:
+- **Visão geral:** Percentuais de cobertura (Statements, Branches, Functions, Lines)
+- **Detalhes por arquivo:** Linhas cobertas (verde), parcialmente cobertas (amarelo) e não cobertas (vermelho)
+- **Branches não testados:** Caminhos condicionais que não foram executados
+
+#### Testes E2E (Cypress)
+
+**⚠️ Importante:** Antes de executar os testes E2E, certifique-se de que a aplicação está rodando (`npm run start:dev`).
+
+**💡 Recomendação:** Use o browser padrão do Cypress (Electron) ao invés do Chrome. O Electron não exibe os popups de aviso de senha insegura do Chrome, tornando os testes mais limpos e sem interrupções.
+
+**Interface interativa (recomendado - usa Electron por padrão):**
+```bash
+npm run e2e
+```
+
+**Interface interativa com Chrome (se preferir):**
+```bash
+npm run e2e:chrome
+```
+
+**Execução headless (sem interface, para CI/CD):**
+```bash
+npm run e2e:headless
+```
+
+**Execução headless com Chrome:**
+```bash
+npm run e2e:headless:chrome
+```
+
+### Build para Produção
+
+```bash
+npm run build:prod
+```
+
+Os arquivos compilados estarão na pasta `dist/teste-pge/`.
 
 ---
 
-### Validação Manual (Passo a Passo)
+## 📝 Decisão sobre Docker
 
-Se preferir não usar os scripts, você pode executar manualmente:
+Como mencionado na seção de [Decisões Arquiteturais](#-decisões-arquiteturais-e-técnicas), inicialmente adotei uma abordagem "Docker First", mas decidi removê-la durante o desenvolvimento.
 
-1. **Subir a aplicação:**
-   ```bash
-   docker-compose -f docker-compose.dev.yml up --build
-   ```
-2. **Acessar:**
-   - Frontend: [http://localhost:4200](http://localhost:4200)
-   - API Mock: [http://localhost:3000](http://localhost:3000)
+**Resumo dos problemas técnicos:**
+- **Jasmine/Karma:** Embora os testes executassem corretamente em modo headless via terminal dentro do Docker, a interface web do Karma (disponível em `http://localhost:9876`) não funcionava adequadamente para visualização interativa dos resultados, mesmo com configurações de portas e acesso externo.
+- **Cypress:** Similarmente, os testes E2E funcionavam em modo headless, mas a interface interativa do Cypress Test Runner não operava corretamente dentro de containers Docker, impedindo a visualização e debug dos testes em tempo real.
+
+**Decisão final:**
+Optei por remover o Docker da stack de desenvolvimento para garantir que o revisor possa:
+1. Visualizar os testes unitários no browser do Jasmine/Karma de forma nativa e interativa
+2. Executar os testes E2E do Cypress com interface visual completa
+3. Ter uma experiência de desenvolvimento mais direta e sem camadas de abstração que possam complicar o debug
+
+Embora o Docker ofereça benefícios de isolamento e consistência, acredito que para um teste técnico, a capacidade de visualizar e interagir com os testes é mais valiosa do que a garantia de ambiente idêntico. Em um ambiente de produção ou CI/CD, essas limitações poderiam ser contornadas com configurações mais complexas, mas isso estava além do escopo deste projeto.
+
+**Pré-condições para execução local:**
+- Node.js 18+ instalado
+- Electron (vem com Cypress) - Recomendado para evitar avisos de senha insegura durante os testes E2E
+- Portas 4200 (Angular) e 3000 (JSON Server) disponíveis

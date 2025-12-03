@@ -37,8 +37,8 @@ export class ClienteService {
    * @returns Observable com array de clientes filtrados
    *
    * @example
-   * buscarPorCampo('nome', 'João') // Busca clientes com nome contendo 'João'
-   * buscarPorCampo('endereco.cidade', 'São Paulo') // Busca por cidade
+   * buscarPorCampo('nome', 'João')
+   * buscarPorCampo('endereco.cidade', 'São Paulo')
    */
   buscarPorCampo(campo: string, termo: string, headers?: { [key: string]: string }): Observable<Cliente[]> {
     const params = new HttpParams().set(`${campo}_like`, termo);
@@ -51,29 +51,22 @@ export class ClienteService {
    * - Se o termo não contém espaço: busca por qualquer palavra que contenha o termo
    */
   buscarPorNomeInteligente(termo: string, headers?: { [key: string]: string }): Observable<Cliente[]> {
-    // Converte tudo para minúsculo para comparação case insensitive
     const termoLower = termo.toLowerCase().trim();
 
-    // Busca todos os clientes e filtra no frontend com lógica inteligente
     return this.listar(headers).pipe(
       map(clientes => {
         if (termoLower.includes(' ')) {
-          // Se tem espaço, dividir o termo em partes e verificar se cada parte
-          // está presente em alguma palavra do nome
           const partesTermo = termoLower.split(/\s+/).filter(p => p.length > 0);
 
           return clientes.filter(cliente => {
             const nomeLower = cliente.nome.toLowerCase();
             const palavrasNome = nomeLower.split(/\s+/);
 
-            // Verificar se cada parte do termo está presente em alguma palavra do nome
-            // (case insensitive - tudo já convertido para minúsculo)
             return partesTermo.every(parteTermo =>
               palavrasNome.some(palavraNome => palavraNome.includes(parteTermo))
             );
           });
         } else {
-          // Se não tem espaço, busca por qualquer palavra que contenha o termo
           return clientes.filter(cliente => {
             const nomeLower = cliente.nome.toLowerCase();
             const palavras = nomeLower.split(/\s+/);
@@ -106,35 +99,27 @@ export class ClienteService {
     pagina?: number;
     limite?: number;
   }): Observable<{ clientes: Cliente[]; total: number }> {
-    // Limpa formatação dos filtros antes de processar
     const filtrosLimpos = this.limparFormatacaoFiltros(filtros);
 
     let params = new HttpParams();
 
-    // Adiciona filtros (já limpos de formatação)
     if (filtrosLimpos.nome) params = params.set('nome_like', filtrosLimpos.nome);
     if (filtrosLimpos.cpf) params = params.set('cpf_like', filtrosLimpos.cpf);
     if (filtrosLimpos.email) params = params.set('email_like', filtrosLimpos.email);
     if (filtrosLimpos.telefone) params = params.set('telefone_like', filtrosLimpos.telefone);
 
-    // Filtro de cidade (case insensitive com contains)
     if (filtros.cidade) {
-      // json-server já faz case insensitive e contains com _like
       params = params.set('endereco.cidade_like', filtros.cidade);
     }
 
-    // Filtro de status
     if (filtros.status && filtros.status !== 'todos') {
       const ativo = filtros.status === 'ativos' ? 'true' : 'false';
       params = params.set('ativo', ativo);
     }
-    // Para status 'todos', não aplicamos nenhum filtro (já que queremos todos os registros)
 
-    // Ordenação padrão por nome
     params = params.set('_sort', 'nome');
     params = params.set('_order', 'asc');
 
-    // Paginação (json-server usa 1-based indexing)
     if (filtros.pagina !== undefined && filtros.pagina >= 0) {
       params = params.set('_page', (filtros.pagina + 1).toString());
     }
@@ -194,7 +179,7 @@ export class ClienteService {
    */
   @LogOperation('ATUALIZACAO', (args, result) => {
     const changes = args[1];
-    const cliente = result; // Cliente retornado após atualização
+    const cliente = result;
     if (changes.ativo === true) {
       return `Cliente "${cliente.nome}" foi reativado`;
     } else if (changes.ativo === false) {
@@ -227,7 +212,7 @@ export class ClienteService {
    * @returns Observable com cliente desativado
    */
   @LogOperation('EXCLUSAO', (args, result) => {
-    const cliente = result; // Cliente retornado após desativação
+    const cliente = result;
     return `Cliente "${cliente.nome}" foi desativado`;
   })
   excluir(id: string): Observable<Cliente> {
@@ -238,8 +223,6 @@ export class ClienteService {
    * Retorna o total de registros de clientes no sistema, independentemente de status ou filtros.
    */
   contarTotalGeral(): Observable<number> {
-    // json-server retorna o total no header x-total-count
-    // Usamos _page=1&_limit=1 para garantir comportamento padrão de paginação
     const params = new HttpParams().set('_page', '1').set('_limit', '1');
     return this.http.get<Cliente[]>(this.apiUrl, { params, observe: 'response' }).pipe(
       map(response => {
@@ -247,8 +230,6 @@ export class ClienteService {
         if (totalHeader) {
           return parseInt(totalHeader, 10);
         }
-        // Fallback: se não vier header, mas vier corpo, assume que o backend ignorou paginação
-        // e retornou tudo (comportamento possível em alguns proxies/setups)
         if (response.body && Array.isArray(response.body)) {
             return response.body.length;
         }

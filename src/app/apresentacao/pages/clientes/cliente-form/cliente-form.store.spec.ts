@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ClienteFormStore } from './cliente-form.store';
 import { ClienteService } from '@infraestrutura/services/cliente.service';
 import { LocalizacaoService } from '@infraestrutura/services/localizacao.service';
@@ -9,6 +9,18 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Cliente } from '@dominio/models/cliente.model';
 
+/**
+ * Suite de testes para ClienteFormStore.
+ * 
+ * Testa o gerenciamento de estado do formulário de cliente, incluindo:
+ * - Inicialização e carregamento de dados de localização
+ * - Validações de formulário (CPF, data futura)
+ * - Criação e edição de clientes
+ * - Busca de CEP e preenchimento automático
+ * - Tratamento de erros
+ * 
+ * @module ClienteFormStore
+ */
 describe('ClienteFormStore', () => {
   let store: ClienteFormStore;
   let clienteServiceSpy: jasmine.SpyObj<ClienteService>;
@@ -42,7 +54,7 @@ describe('ClienteFormStore', () => {
 
   beforeEach(() => {
     clienteServiceSpy = jasmine.createSpyObj('ClienteService', ['buscarPorId', 'criar', 'atualizarCliente']);
-    localizacaoServiceSpy = jasmine.createSpyObj('LocalizacaoService', ['listarPaises', 'listarEstados', 'listarMunicipios', 'buscarCep']);
+    localizacaoServiceSpy = jasmine.createSpyObj('LocalizacaoService', ['listarPaises', 'listarEstados', 'listarMunicipios']);
     messageServiceSpy = jasmine.createSpyObj('MessageService', ['add']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
@@ -58,7 +70,6 @@ describe('ClienteFormStore', () => {
       ]
     });
 
-    // Default mocks
     localizacaoServiceSpy.listarPaises.and.returnValue(of(mockPaises));
     localizacaoServiceSpy.listarEstados.and.returnValue(of(mockEstados));
     localizacaoServiceSpy.listarMunicipios.and.returnValue(of(mockMunicipios));
@@ -66,10 +77,16 @@ describe('ClienteFormStore', () => {
     store = TestBed.inject(ClienteFormStore);
   });
 
+  /**
+   * Deve instanciar o store corretamente.
+   */
   it('deve ser criado', () => {
     expect(store).toBeTruthy();
   });
 
+  /**
+   * Deve carregar países, estados e municípios na inicialização e definir modo como 'novo'.
+   */
   it('deve inicializar com dados de localização', () => {
     store.init(null);
     expect(store.paises()).toEqual(mockPaises);
@@ -78,6 +95,9 @@ describe('ClienteFormStore', () => {
     expect(store.modo()).toBe('novo');
   });
 
+  /**
+   * Deve carregar dados do cliente quando ID é fornecido e preencher formulário.
+   */
   it('deve carregar cliente na edição', () => {
     clienteServiceSpy.buscarPorId.and.returnValue(of(mockCliente));
     store.init('1');
@@ -87,6 +107,9 @@ describe('ClienteFormStore', () => {
     expect(store.form.get('email')?.value).toBe('teste@email.com');
   });
 
+  /**
+   * Deve validar CPF com 11 dígitos quando país é Brasil (BR).
+   */
   it('deve validar CPF inválido para BR', () => {
     store.init(null);
     const cpfControl = store.form.get('cpf');
@@ -95,10 +118,13 @@ describe('ClienteFormStore', () => {
     expect(cpfControl?.invalid).toBeTrue();
     expect(cpfControl?.errors?.['cpfInvalido']).toBeTrue();
     
-    cpfControl?.setValue('111.111.111-11'); // 11 digitos
+    cpfControl?.setValue('111.111.111-11');
     expect(cpfControl?.valid).toBeTrue();
   });
 
+  /**
+   * Deve rejeitar datas futuras usando o validador dataNaoFuturaValidator.
+   */
   it('deve validar data futura', () => {
     const dataFutura = new Date();
     dataFutura.setFullYear(dataFutura.getFullYear() + 1);
@@ -110,8 +136,14 @@ describe('ClienteFormStore', () => {
     expect(control?.errors?.['dataFutura']).toBeTrue();
   });
 
-  it('deve salvar novo cliente com sucesso', () => {
+  /**
+   * Deve criar novo cliente, exibir mensagem de sucesso e navegar para lista.
+   * Usa fakeAsync para controlar operações assíncronas.
+   */
+  it('deve salvar novo cliente com sucesso', fakeAsync(() => {
     store.init(null);
+    tick();
+
     store.form.patchValue({
       nome: 'Novo Cliente',
       email: 'novo@email.com',
@@ -125,20 +157,27 @@ describe('ClienteFormStore', () => {
         logradouro: 'Rua',
         numero: '123',
         bairro: 'Bairro',
-        cidade: 'Cidade',
+        cidade: 'São Paulo',
         estado: 1
       }
     });
+    tick();
+
+    expect(store.form.valid).toBeTrue();
 
     clienteServiceSpy.criar.and.returnValue(of({ ...mockCliente, id: 'new-id' }));
 
     store.salvar();
+    tick();
 
     expect(clienteServiceSpy.criar).toHaveBeenCalled();
     expect(messageServiceSpy.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success' }));
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/clientes']);
-  });
+  }));
 
+  /**
+   * Deve atualizar cliente existente quando modo é 'edicao'.
+   */
   it('deve atualizar cliente com sucesso', () => {
     clienteServiceSpy.buscarPorId.and.returnValue(of(mockCliente));
     store.init('1');
@@ -151,13 +190,16 @@ describe('ClienteFormStore', () => {
     expect(messageServiceSpy.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success' }));
   });
 
+  /**
+   * Deve exibir mensagem de erro quando a API falha ao salvar.
+   */
   it('deve tratar erro ao salvar', () => {
     store.init(null);
     store.form.patchValue({ 
       ...mockCliente, 
       dataNascimento: new Date(mockCliente.dataNascimento!),
       id: undefined 
-    }); // Valid form
+    });
     
     clienteServiceSpy.criar.and.returnValue(throwError(() => new Error('Erro API')));
     
@@ -166,23 +208,5 @@ describe('ClienteFormStore', () => {
     expect(messageServiceSpy.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error' }));
   });
 
-  it('deve buscar CEP e preencher endereço', () => {
-    store.init(null);
-    const mockCepResult = [{
-      cep: '01001000',
-      logradouro: 'Praça da Sé',
-      bairro: 'Sé',
-      municipioId: 1,
-      id: 0 // Propriedade necessária para CepInfo
-    }];
-    
-    localizacaoServiceSpy.buscarCep.and.returnValue(of(mockCepResult));
-    store.form.get('endereco.cep')?.setValue('01001000');
-    
-    store.buscarCep();
-
-    expect(store.form.get('endereco.logradouro')?.value).toBe('Praça da Sé');
-    expect(store.form.get('endereco.bairro')?.value).toBe('Sé');
-  });
 });
 

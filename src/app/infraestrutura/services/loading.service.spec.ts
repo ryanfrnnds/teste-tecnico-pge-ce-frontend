@@ -1,6 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { LoadingService } from './loading.service';
 
+/**
+ * Suite de testes para LoadingService.
+ * 
+ * Testa o gerenciamento de estado de loading global da aplicação, incluindo:
+ * - Controle de requisições HTTP ativas
+ * - Emissão de estado de carregamento (true/false)
+ * - Comportamento com múltiplas requisições simultâneas
+ * 
+ * @module LoadingService
+ */
 describe('LoadingService', () => {
   let service: LoadingService;
 
@@ -43,7 +53,7 @@ describe('LoadingService', () => {
 
       service.carregando.subscribe(carregando => {
         carregandoChamadas++;
-        if (carregandoChamadas === 2) { // primeira chamada é false, segunda é true
+        if (carregandoChamadas === 2) {
           expect(carregando).toBeTrue();
           done();
         }
@@ -58,7 +68,6 @@ describe('LoadingService', () => {
       service.carregando.subscribe(carregando => {
         valores.push(carregando);
         
-        // Esperamos: false (inicial), true (req 1), (req 2 não emite novo valor)
         if (valores.length === 2) {
           expect(valores).toEqual([false, true]);
           expect(service['requisicoesAtivas$'].value).toBeGreaterThan(0);
@@ -93,7 +102,7 @@ describe('LoadingService', () => {
 
       service.carregando.subscribe(carregando => {
         carregandoChamadas++;
-        if (carregandoChamadas === 2) { // true -> false
+        if (carregandoChamadas === 2) {
           expect(carregando).toBeFalse();
           done();
         }
@@ -113,7 +122,7 @@ describe('LoadingService', () => {
     it('não deve permitir contador negativo', (done) => {
       service.decrementarRequisicao();
       service.decrementarRequisicao();
-      service.decrementarRequisicao(); // tentativa de ir para -1
+      service.decrementarRequisicao();
 
       service.requisicoesAtivas.subscribe(requisicoes => {
         expect(requisicoes).toBe(0);
@@ -136,10 +145,10 @@ describe('LoadingService', () => {
         }
       });
 
-      service.incrementarRequisicao(); // 1
-      service.incrementarRequisicao(); // 2
-      service.decrementarRequisicao(); // 1
-      service.decrementarRequisicao(); // 0
+      service.incrementarRequisicao();
+      service.incrementarRequisicao();
+      service.decrementarRequisicao();
+      service.decrementarRequisicao();
     });
 
     it('deve gerenciar estado de carregando corretamente', (done) => {
@@ -155,10 +164,10 @@ describe('LoadingService', () => {
         }
       });
 
-      service.incrementarRequisicao(); // false -> true
-      service.incrementarRequisicao(); // permanece true
-      service.decrementarRequisicao(); // permanece true
-      service.decrementarRequisicao(); // true -> false
+      service.incrementarRequisicao();
+      service.incrementarRequisicao();
+      service.decrementarRequisicao();
+      service.decrementarRequisicao();
     });
   });
 });

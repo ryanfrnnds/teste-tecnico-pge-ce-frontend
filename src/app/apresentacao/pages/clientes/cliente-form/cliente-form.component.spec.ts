@@ -36,7 +36,7 @@ describe('ClienteFormComponent', () => {
   });
 
   beforeEach(async () => {
-    storeSpy = jasmine.createSpyObj('ClienteFormStore', ['init', 'salvar', 'voltarParaLista', 'buscarCep'], {
+    storeSpy = jasmine.createSpyObj('ClienteFormStore', ['init', 'salvar', 'voltarParaLista'], {
       form: formGroup,
       modo: () => 'novo',
       carregando: () => false,

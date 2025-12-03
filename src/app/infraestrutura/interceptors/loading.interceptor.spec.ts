@@ -4,6 +4,17 @@ import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { LoadingInterceptor } from './loading.interceptor';
 import { LoadingService } from '../services/loading.service';
 
+/**
+ * Suite de testes para LoadingInterceptor.
+ * 
+ * Testa o interceptor HTTP que controla o estado de loading global, incluindo:
+ * - Interceptação de requisições para /api/*
+ * - Ignorar requisições de assets estáticos
+ * - Controle de múltiplas requisições simultâneas
+ * - Headers X-Skip-Loading para pular controle
+ * 
+ * @module LoadingInterceptor
+ */
 describe('LoadingInterceptor', () => {
   let httpClient: HttpClient;
   let httpTestingController: HttpTestingController;
@@ -59,19 +70,16 @@ describe('LoadingInterceptor', () => {
       httpClient.get('/api/test1').subscribe();
       httpClient.get('/api/test2').subscribe();
 
-      // [false (inicial), true (primeira req)]. Segunda req não emite novo true.
       expect(valoresCarregando).toEqual([false, true]);
 
       const req1 = httpTestingController.expectOne('/api/test1');
       req1.flush({});
 
-      // Continua true pois tem 1 req pendente
       expect(valoresCarregando).toEqual([false, true]);
 
       const req2 = httpTestingController.expectOne('/api/test2');
       req2.flush({});
 
-      // Volta a false
       expect(valoresCarregando).toEqual([false, true, false]);
     });
 
@@ -105,11 +113,9 @@ describe('LoadingInterceptor', () => {
 
       httpClient.get('/assets/test.png').subscribe();
 
-      // Deve permanecer false (valor inicial) e não ter mudado para true
       expect(carregandoValor).toBeFalse();
 
       const req = httpTestingController.expectOne('/assets/test.png');
-      // Não precisamos de corpo específico para este teste; evitar Blob para não forçar conversão JSON
       req.flush({});
     });
 

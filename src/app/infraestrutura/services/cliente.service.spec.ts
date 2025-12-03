@@ -3,6 +3,17 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { ClienteService } from './cliente.service';
 import { Cliente } from '@dominio/models/cliente.model';
 
+/**
+ * Suite de testes para ClienteService.
+ * 
+ * Testa todas as operações CRUD de clientes, incluindo:
+ * - Listagem de clientes
+ * - Busca por diferentes critérios (nome, cidade, status)
+ * - Criação, atualização e exclusão (soft delete)
+ * - Paginação e filtros
+ * 
+ * @module ClienteService
+ */
 describe('ClienteService', () => {
   let service: ClienteService;
   let httpMock: HttpTestingController;
@@ -46,10 +57,16 @@ describe('ClienteService', () => {
   });
 
   afterEach(() => {
-    // httpMock.verify(); // Removido para evitar erros de "open requests" causados pelos decorators de Log
   });
 
+  /**
+   * Testes para o método listar().
+   * Verifica se a requisição GET é feita corretamente para o endpoint de clientes.
+   */
   describe('listar', () => {
+    /**
+     * Deve fazer uma requisição GET para /api/clientes e retornar a lista de clientes.
+     */
     it('deve fazer GET para /api/clientes', () => {
       service.listar().subscribe(clientes => {
         expect(clientes).toEqual(mockClientes);
@@ -60,6 +77,9 @@ describe('ClienteService', () => {
       req.flush(mockClientes);
     });
 
+    /**
+     * Deve aceitar e enviar headers customizados na requisição.
+     */
     it('deve enviar headers quando fornecidos', () => {
       const headers = { 'X-Custom': 'test' };
 
@@ -70,7 +90,14 @@ describe('ClienteService', () => {
     });
   });
 
+  /**
+   * Testes para o método buscarPorCampo().
+   * Verifica busca por campo específico usando o operador _like do json-server.
+   */
   describe('buscarPorCampo', () => {
+    /**
+     * Deve fazer GET com parâmetro _like para buscar por nome.
+     */
     it('deve fazer GET com parâmetro _like', () => {
       service.buscarPorCampo('nome', 'João').subscribe(clientes => {
         expect(clientes).toEqual([mockCliente]);
@@ -84,6 +111,9 @@ describe('ClienteService', () => {
       req.flush([mockCliente]);
     });
 
+    /**
+     * Deve funcionar com campos aninhados (ex: endereco.cidade).
+     */
     it('deve funcionar com diferentes campos', () => {
       service.buscarPorCampo('endereco.cidade', 'São Paulo').subscribe();
 
@@ -96,7 +126,14 @@ describe('ClienteService', () => {
     });
   });
 
+  /**
+   * Testes para o método buscarComFiltros().
+   * Verifica aplicação de múltiplos filtros, paginação e limpeza de formatação.
+   */
   describe('buscarComFiltros', () => {
+    /**
+     * Deve aplicar filtro de nome e retornar total correto do header x-total-count.
+     */
     it('deve aplicar filtro de nome', () => {
       service.buscarComFiltros({ nome: 'João' }).subscribe(result => {
         expect(result.clientes).toEqual(mockClientes);
@@ -113,6 +150,9 @@ describe('ClienteService', () => {
       });
     });
 
+    /**
+     * Deve aplicar filtro de cidade usando endereco.cidade_like.
+     */
     it('deve aplicar filtro de cidade', () => {
       service.buscarComFiltros({ cidade: 'São Paulo' }).subscribe();
 
@@ -122,6 +162,9 @@ describe('ClienteService', () => {
       req.flush([], { headers: { 'x-total-count': '0' } });
     });
 
+    /**
+     * Deve aplicar filtro para clientes ativos (ativo=true).
+     */
     it('deve aplicar filtro de status ativos', () => {
       service.buscarComFiltros({ status: 'ativos' }).subscribe();
 
@@ -131,6 +174,9 @@ describe('ClienteService', () => {
       req.flush([], { headers: { 'x-total-count': '0' } });
     });
 
+    /**
+     * Deve aplicar filtro para clientes inativos (ativo=false).
+     */
     it('deve aplicar filtro de status inativos', () => {
       service.buscarComFiltros({ status: 'inativos' }).subscribe();
 
@@ -140,6 +186,9 @@ describe('ClienteService', () => {
       req.flush([], { headers: { 'x-total-count': '0' } });
     });
 
+    /**
+     * Não deve adicionar parâmetro ativo quando status é "todos".
+     */
     it('não deve aplicar filtro de status quando "todos"', () => {
       service.buscarComFiltros({ status: 'todos' }).subscribe();
 
@@ -151,16 +200,22 @@ describe('ClienteService', () => {
       req.flush([], { headers: { 'x-total-count': '0' } });
     });
 
+    /**
+     * Deve converter página 0-based para 1-based (json-server) e aplicar limite.
+     */
     it('deve aplicar paginação', () => {
       service.buscarComFiltros({ pagina: 1, limite: 20 }).subscribe();
 
       const req = httpMock.expectOne(req =>
-        req.params.get('_page') === '2' && // json-server usa 1-based
+        req.params.get('_page') === '2' &&
         req.params.get('_limit') === '20'
       );
       req.flush([], { headers: { 'x-total-count': '0' } });
     });
 
+    /**
+     * Deve remover formatação de CPF e telefone antes de enviar para o backend.
+     */
     it('deve limpar formatação de filtros', () => {
       const filtrosComFormatacao: any = {
         nome: 'João',
@@ -176,7 +231,14 @@ describe('ClienteService', () => {
     });
   });
 
+  /**
+   * Testes para o método buscarPorNomeInteligente().
+   * Verifica lógica de busca inteligente que diferencia termos com e sem espaços.
+   */
   describe('buscarPorNomeInteligente', () => {
+    /**
+     * Quando o termo contém espaço, deve buscar por todas as partes do termo.
+     */
     it('deve fazer busca exata quando termo contém espaço', () => {
       service.buscarPorNomeInteligente('João Silva').subscribe(clientes => {
         expect(clientes).toEqual([mockCliente]);
@@ -184,10 +246,11 @@ describe('ClienteService', () => {
 
       const req = httpMock.expectOne('/api/clientes');
       req.flush(mockClientes);
-
-      // O mockCliente tem "João Silva" então deve ser encontrado
     });
 
+    /**
+     * Quando o termo não contém espaço, deve buscar por qualquer palavra que contenha o termo.
+     */
     it('deve fazer busca parcial quando termo não contém espaço', () => {
       service.buscarPorNomeInteligente('João').subscribe(clientes => {
         expect(clientes).toEqual([mockCliente]);
@@ -197,6 +260,9 @@ describe('ClienteService', () => {
       req.flush(mockClientes);
     });
 
+    /**
+     * A busca deve ser case insensitive (maiúsculas/minúsculas).
+     */
     it('deve ser case insensitive', () => {
       service.buscarPorNomeInteligente('joão').subscribe(clientes => {
         expect(clientes).toEqual([mockCliente]);
@@ -207,7 +273,14 @@ describe('ClienteService', () => {
     });
   });
 
+  /**
+   * Testes para o método buscarPorId().
+   * Verifica busca de cliente por ID único.
+   */
   describe('buscarPorId', () => {
+    /**
+     * Deve fazer GET para /api/clientes/{id} e retornar o cliente específico.
+     */
     it('deve fazer GET para cliente específico', () => {
       service.buscarPorId('1').subscribe(cliente => {
         expect(cliente).toEqual(mockCliente);
@@ -219,7 +292,14 @@ describe('ClienteService', () => {
     });
   });
 
+  /**
+   * Testes para o método criar().
+   * Verifica criação de novo cliente e logging automático via decorator.
+   */
   describe('criar', () => {
+    /**
+     * Deve fazer POST para /api/clientes com o payload do cliente.
+     */
     it('deve fazer POST para criar cliente', () => {
       service.criar(mockCliente).subscribe(cliente => {
         expect(cliente).toEqual(mockCliente);
@@ -232,7 +312,14 @@ describe('ClienteService', () => {
     });
   });
 
+  /**
+   * Testes para o método atualizar().
+   * Verifica atualização parcial (PATCH) de cliente e logging automático.
+   */
   describe('atualizar', () => {
+    /**
+     * Deve fazer PATCH para /api/clientes/{id} com apenas os campos a atualizar.
+     */
     it('deve fazer PATCH para atualizar cliente', () => {
       const updates = { ativo: false };
 
@@ -246,6 +333,9 @@ describe('ClienteService', () => {
       req.flush(mockCliente);
     });
 
+    /**
+     * Deve permitir reativar cliente inativo alterando ativo para true.
+     */
     it('deve suportar reativação de cliente', () => {
       const updates = { ativo: true };
 
@@ -257,7 +347,14 @@ describe('ClienteService', () => {
     });
   });
 
+  /**
+   * Testes para o método excluir().
+   * Verifica soft delete (desativação) de cliente e logging automático.
+   */
   describe('excluir', () => {
+    /**
+     * Deve fazer PATCH para desativar cliente (soft delete), não DELETE físico.
+     */
     it('deve fazer PATCH para desativar cliente (soft delete)', () => {
       service.excluir('1').subscribe(cliente => {
         expect(cliente).toEqual(mockCliente);
@@ -269,6 +366,4 @@ describe('ClienteService', () => {
       req.flush(mockCliente);
     });
   });
-
-  // O comportamento de limparFormatacaoFiltros já é coberto nos testes de buscarComFiltros.
 });

@@ -30,12 +30,10 @@ export class MaskEmailPipe implements PipeTransform {
     if (nome.length > 0) {
       const primeiraLetra = nome.charAt(0);
 
-      // Email mascarado: l****.a****@exemplo.com
       const partesNome = nome.split('.');
       if (partesNome.length > 1) {
         const primeiraParte = partesNome[0];
         const segundaParte = partesNome[1];
-        // Proteção se segunda parte for vazia
         const primeiraLetraSegunda = segundaParte.length > 0 ? segundaParte.charAt(0) : '';
         return `${primeiraParte.charAt(0)}****.${primeiraLetraSegunda}****@${dominio}`;
       }

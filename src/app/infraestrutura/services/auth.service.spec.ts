@@ -3,6 +3,17 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { Router } from '@angular/router';
 import { AuthService, AuthCredentials, AuthUser } from './auth.service';
 
+/**
+ * Suite de testes para AuthService.
+ * 
+ * Testa o serviço de autenticação, incluindo:
+ * - Login e logout
+ * - Gerenciamento de token e sessão
+ * - Verificação de autenticação
+ * - Restauração de sessão do localStorage
+ * 
+ * @module AuthService
+ */
 describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
@@ -30,7 +41,6 @@ describe('AuthService', () => {
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
 
-    // Garante storage limpo entre testes
     localStorage.clear();
   });
 
@@ -60,8 +70,6 @@ describe('AuthService', () => {
   it('deve indicar autenticado quando existe token no storage', () => {
     localStorage.setItem('teste-pge-token', 'stored-token');
     localStorage.setItem('teste-pge-user', JSON.stringify(mockUser));
-
-    // Reset para garantir nova instância que leia o storage no construtor
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],

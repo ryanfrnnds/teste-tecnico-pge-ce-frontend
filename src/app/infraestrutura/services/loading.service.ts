@@ -34,7 +34,6 @@ export class LoadingService {
     }
   }
 
-  // Alias methods to match usage in Stores
   iniciar(): void {
     this.incrementarRequisicao();
   }

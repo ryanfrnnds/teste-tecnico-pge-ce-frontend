@@ -22,12 +22,10 @@ export class MaskPhonePipe implements PipeTransform {
     const digitos = value.replace(/\D/g, '');
     
     if (digitos.length === 11) {
-      // Telefone mascarado: (85) 9****-0259
       return `(${digitos.slice(0, 2)}) 9****-${digitos.slice(7)}`;
     }
 
     if (digitos.length === 10) {
-      // Para telefone de 10 dígitos, adapta a máscara
       return `(${digitos.slice(0, 2)}) ****-${digitos.slice(6)}`;
     }
 

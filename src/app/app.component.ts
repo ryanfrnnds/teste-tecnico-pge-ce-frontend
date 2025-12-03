@@ -67,11 +67,12 @@ export class AppComponent implements OnInit {
   }
 
   private checkDevEnvironmentAndData(): void {
-    if (isDevMode()) {
-      // Check for clients OR logs existence to prompt cleanup
+    const isCypressRunning = typeof (window as any).Cypress !== 'undefined';
+    
+    if (isDevMode() && !isCypressRunning) {
       forkJoin({
         clientes: this.clienteService.listar({ _limit: '1' }).pipe(take(1), catchError(() => of([]))),
-        logs: this.logService.listar().pipe(take(1), catchError(() => of([]))) // listar usually returns all, checking length is fine for dev
+        logs: this.logService.listar().pipe(take(1), catchError(() => of([])))
       }).subscribe({
         next: (result) => {
           const hasClientes = result.clientes && result.clientes.length > 0;

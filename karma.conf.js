@@ -11,11 +11,17 @@ module.exports = function (config) {
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
-      jasmine: {},
+      jasmine: {
+        random: false,
+        seed: '4321',
+        stopOnFailure: false,
+        failFast: false,
+        timeoutInterval: 10000
+      },
       clearContext: false
     },
     jasmineHtmlReporter: {
-      suppressAll: true
+      suppressAll: false // Permite exibir a interface HTML do Jasmine
     },
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage/teste-pge'),
@@ -28,23 +34,37 @@ module.exports = function (config) {
     // Removendo 'kjhtml' para focar apenas no output do terminal e forçando 'spec'
     reporters: ['kjhtml', 'spec'],
     specReporter: {
-      maxLogLines: 10,             
-      suppressErrorSummary: false, 
-      suppressFailed: false,      
-      suppressPassed: false,      
-      suppressSkipped: false,      
-      showSpecTiming: true,      
-      failFast: false             
+      maxLogLines: 15,
+      suppressErrorSummary: false,
+      suppressFailed: false,
+      suppressPassed: false,
+      suppressSkipped: false,
+      showSpecTiming: true,
+      failFast: false,
+      prefixes: {
+        success: '✓ ',
+        failure: '✗ ',
+        skipped: '- '
+      }
     },
-    browsers: ['Chrome', 'ChromeHeadlessNoSandbox'],
+    browsers: ['ChromeHeadlessNoSandbox'], // Usa headless por padrão, mas mantém interface web ativa
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
         flags: ['--no-sandbox', '--disable-gpu']
+      },
+      Chrome: {
+        base: 'Chrome',
+        flags: ['--no-sandbox', '--disable-gpu', '--remote-debugging-port=9222']
       }
     },
+    autoWatch: true,
+    singleRun: false,
     restartOnFileChange: true,
     colors: true,
     logLevel: config.LOG_INFO,
+    // Permite acesso externo ao Karma
+    listenAddress: '0.0.0.0',
+    port: 9876,
   });
 };

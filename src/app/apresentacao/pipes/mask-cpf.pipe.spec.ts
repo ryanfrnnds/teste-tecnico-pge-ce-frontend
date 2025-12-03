@@ -28,6 +28,6 @@ describe('MaskCpfPipe', () => {
   it('deve retornar valor original se CPF tiver tamanho inválido', () => {
     expect(pipe.transform('123')).toBe('123');
     expect(pipe.transform('123456')).toBe('123456');
-    expect(pipe.transform('123456789012')).toBe('123456789012'); // 12 digitos
+    expect(pipe.transform('123456789012')).toBe('123456789012');
   });
 });

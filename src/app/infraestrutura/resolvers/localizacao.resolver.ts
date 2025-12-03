@@ -23,7 +23,7 @@ export const localizacaoResolver: ResolveFn<LocalizacaoData> = () => {
     paises: service.listarPaises(),
     estados: service.listarEstados(),
     municipios: service.listarMunicipios(),
-    ceps: service.buscarCep('') // retorna todos os ceps se não filtrar por cep
+    ceps: service.buscarCep('')
   });
 };
 

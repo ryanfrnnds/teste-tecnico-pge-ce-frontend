@@ -22,7 +22,7 @@ export class ThemeService {
         ? stored
         : prefersDark
           ? 'dark'
-          : 'dark'; // padrão: dark
+          : 'dark';
 
     this.applyMode(initialMode, false);
     this.modoSubject.next(initialMode);
