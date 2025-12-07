@@ -1,4 +1,5 @@
-const targetHost = process.env.API_PROXY_HOST || 'json-server';
+// const targetHost = process.env.API_PROXY_HOST || 'json-server';
+const targetHost = 'localhost'
 
 module.exports = {
   '/api': {
