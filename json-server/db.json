@@ -1,6 +1,618 @@
 {
-  "clientes": [],
-  "logs": [],
+  "clientes": [
+    {
+      "id": "miuz0qea-r5h1yr",
+      "nome": "Ana Silva",
+      "cpf": "00111111111",
+      "email": "ana.silva0@exemplo.com",
+      "telefone": "8598000000",
+      "tipoContato": "Celular",
+      "dataNascimento": "1980-01-01T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010000",
+        "logradouro": "Rua Silva",
+        "numero": "100",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Fortaleza",
+        "estado": "CE"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-bkmpjn",
+      "nome": "Carlos Alves",
+      "cpf": "00111234568",
+      "email": "carlos.alves1@exemplo.com",
+      "telefone": "8598000037",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1981-02-02T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010001",
+        "logradouro": "Rua Alves",
+        "numero": "101",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Sobral",
+        "estado": "PI"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-7fok0c",
+      "nome": "Juliana Costa",
+      "cpf": "00111358025",
+      "email": "juliana.costa2@exemplo.com",
+      "telefone": "8598000074",
+      "tipoContato": "Celular",
+      "dataNascimento": "1982-03-03T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010002",
+        "logradouro": "Rua Costa",
+        "numero": "102",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Juazeiro do Norte",
+        "estado": "RN"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-1jx60z",
+      "nome": "Marcos Souza",
+      "cpf": "00111481482",
+      "email": "marcos.souza3@exemplo.com",
+      "telefone": "8598000111",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1983-04-04T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010003",
+        "logradouro": "Rua Souza",
+        "numero": "103",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Caucaia",
+        "estado": "CE"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-k46pav",
+      "nome": "Fernanda Lima",
+      "cpf": "00111604939",
+      "email": "fernanda.lima4@exemplo.com",
+      "telefone": "8598000148",
+      "tipoContato": "Celular",
+      "dataNascimento": "1984-05-05T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010004",
+        "logradouro": "Rua Lima",
+        "numero": "104",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Maracanaú",
+        "estado": "PI"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-h0650v",
+      "nome": "Rafael Santos",
+      "cpf": "00111728396",
+      "email": "rafael.santos5@exemplo.com",
+      "telefone": "8598000185",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1985-06-06T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010005",
+        "logradouro": "Rua Santos",
+        "numero": "105",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Fortaleza",
+        "estado": "RN"
+      },
+      "ativo": true
+    },
+    {
+      "id": "miuz0qea-x4ox7p",
+      "nome": "Beatriz Silva",
+      "cpf": "00111851853",
+      "email": "beatriz.silva6@exemplo.com",
+      "telefone": "8598000222",
+      "tipoContato": "Celular",
+      "dataNascimento": "1986-07-07T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010006",
+        "logradouro": "Rua Silva",
+        "numero": "106",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Sobral",
+        "estado": "CE"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-s4h78e",
+      "nome": "Lucas Alves",
+      "cpf": "00111975310",
+      "email": "lucas.alves7@exemplo.com",
+      "telefone": "8598000259",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1987-08-08T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010007",
+        "logradouro": "Rua Alves",
+        "numero": "107",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Juazeiro do Norte",
+        "estado": "PI"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-6n99bx",
+      "nome": "Mariana Costa",
+      "cpf": "00112098767",
+      "email": "mariana.costa8@exemplo.com",
+      "telefone": "8598000296",
+      "tipoContato": "Celular",
+      "dataNascimento": "1988-09-09T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010008",
+        "logradouro": "Rua Costa",
+        "numero": "108",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Caucaia",
+        "estado": "RN"
+      },
+      "ativo": true
+    },
+    {
+      "id": "miuz0qea-7x6k0s",
+      "nome": "Paulo Souza",
+      "cpf": "00112222224",
+      "email": "paulo.souza9@exemplo.com",
+      "telefone": "8598000333",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1989-10-10T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010009",
+        "logradouro": "Rua Souza",
+        "numero": "109",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Maracanaú",
+        "estado": "CE"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-bg14j6",
+      "nome": "Ana Lima",
+      "cpf": "00112345681",
+      "email": "ana.lima10@exemplo.com",
+      "telefone": "8598000370",
+      "tipoContato": "Celular",
+      "dataNascimento": "1990-11-11T02:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010010",
+        "logradouro": "Rua Lima",
+        "numero": "110",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Fortaleza",
+        "estado": "PI"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-xc5vm6",
+      "nome": "Carlos Santos",
+      "cpf": "00112469138",
+      "email": "carlos.santos11@exemplo.com",
+      "telefone": "8598000407",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1991-12-12T02:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010011",
+        "logradouro": "Rua Santos",
+        "numero": "111",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Sobral",
+        "estado": "RN"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-gsnbl8",
+      "nome": "Juliana Silva",
+      "cpf": "00112592595",
+      "email": "juliana.silva12@exemplo.com",
+      "telefone": "8598000444",
+      "tipoContato": "Celular",
+      "dataNascimento": "1992-01-13T02:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010012",
+        "logradouro": "Rua Silva",
+        "numero": "112",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Juazeiro do Norte",
+        "estado": "CE"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-u619cj",
+      "nome": "Marcos Alves",
+      "cpf": "00112716052",
+      "email": "marcos.alves13@exemplo.com",
+      "telefone": "8598000481",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1993-02-14T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010013",
+        "logradouro": "Rua Alves",
+        "numero": "113",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Caucaia",
+        "estado": "PI"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-5vx62s",
+      "nome": "Fernanda Costa",
+      "cpf": "00112839509",
+      "email": "fernanda.costa14@exemplo.com",
+      "telefone": "8598000518",
+      "tipoContato": "Celular",
+      "dataNascimento": "1994-03-15T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010014",
+        "logradouro": "Rua Costa",
+        "numero": "114",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Maracanaú",
+        "estado": "RN"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-frjh3p",
+      "nome": "Rafael Souza",
+      "cpf": "00112962966",
+      "email": "rafael.souza15@exemplo.com",
+      "telefone": "8598000555",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1995-04-16T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010015",
+        "logradouro": "Rua Souza",
+        "numero": "115",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Fortaleza",
+        "estado": "CE"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-aoghdx",
+      "nome": "Beatriz Lima",
+      "cpf": "00113086423",
+      "email": "beatriz.lima16@exemplo.com",
+      "telefone": "8598000592",
+      "tipoContato": "Celular",
+      "dataNascimento": "1996-05-17T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010016",
+        "logradouro": "Rua Lima",
+        "numero": "116",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Sobral",
+        "estado": "PI"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-mibl6x",
+      "nome": "Lucas Santos",
+      "cpf": "00113209880",
+      "email": "lucas.santos17@exemplo.com",
+      "telefone": "8598000629",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1997-06-18T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010017",
+        "logradouro": "Rua Santos",
+        "numero": "117",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Juazeiro do Norte",
+        "estado": "RN"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-09ub63",
+      "nome": "Mariana Silva",
+      "cpf": "00113333337",
+      "email": "mariana.silva18@exemplo.com",
+      "telefone": "8598000666",
+      "tipoContato": "Celular",
+      "dataNascimento": "1998-07-19T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010018",
+        "logradouro": "Rua Silva",
+        "numero": "118",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Caucaia",
+        "estado": "CE"
+      },
+      "ativo": false
+    },
+    {
+      "id": "miuz0qea-96daoo",
+      "nome": "Paulo Alves",
+      "cpf": "00113456794",
+      "email": "paulo.alves19@exemplo.com",
+      "telefone": "8598000703",
+      "tipoContato": "Whatsapp",
+      "dataNascimento": "1999-08-20T03:00:00.000Z",
+      "pais": "BR",
+      "endereco": {
+        "cep": "6010019",
+        "logradouro": "Rua Alves",
+        "numero": "119",
+        "complemento": "",
+        "bairro": "Bairro Central",
+        "cidade": "Maracanaú",
+        "estado": "PI"
+      },
+      "ativo": true
+    }
+  ],
+  "logs": [
+    {
+      "id": 1,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Ana Silva criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 2,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Carlos Alves criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 3,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Juliana Costa criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 4,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Marcos Souza criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 5,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Fernanda Lima criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 6,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Rafael Santos criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 7,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Beatriz Silva criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 8,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Lucas Alves criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 9,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Mariana Costa criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 10,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Paulo Souza criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 11,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Ana Lima criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 12,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Carlos Santos criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 13,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Juliana Silva criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 14,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Marcos Alves criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 15,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Fernanda Costa criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 16,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Rafael Souza criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 17,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Beatriz Lima criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 18,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Lucas Santos criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 19,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Mariana Silva criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "id": 20,
+      "data": "2025-12-07T00:14:58.211Z",
+      "acao": "CRIACAO",
+      "mensagem": "Cliente Paulo Alves criado (mock)",
+      "usuario": "sistema"
+    },
+    {
+      "data": "2025-12-07T00:15:03.365Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Ana Lima\" foi desativado",
+      "usuario": "admin",
+      "id": 21
+    },
+    {
+      "data": "2025-12-07T00:15:03.660Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Beatriz Lima\" foi desativado",
+      "usuario": "admin",
+      "id": 22
+    },
+    {
+      "data": "2025-12-07T00:15:03.663Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Carlos Alves\" foi desativado",
+      "usuario": "admin",
+      "id": 23
+    },
+    {
+      "data": "2025-12-07T00:15:03.664Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Carlos Santos\" foi desativado",
+      "usuario": "admin",
+      "id": 24
+    },
+    {
+      "data": "2025-12-07T00:15:03.665Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Fernanda Costa\" foi desativado",
+      "usuario": "admin",
+      "id": 25
+    },
+    {
+      "data": "2025-12-07T00:15:03.666Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Fernanda Lima\" foi desativado",
+      "usuario": "admin",
+      "id": 26
+    },
+    {
+      "data": "2025-12-07T00:15:03.688Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Juliana Costa\" foi desativado",
+      "usuario": "admin",
+      "id": 27
+    },
+    {
+      "data": "2025-12-07T00:15:03.985Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Lucas Alves\" foi desativado",
+      "usuario": "admin",
+      "id": 28
+    },
+    {
+      "data": "2025-12-07T00:15:03.986Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Marcos Alves\" foi desativado",
+      "usuario": "admin",
+      "id": 29
+    },
+    {
+      "data": "2025-12-07T00:15:03.986Z",
+      "acao": "EXCLUSAO",
+      "mensagem": "Cliente \"Lucas Santos\" foi desativado",
+      "usuario": "admin",
+      "id": 30
+    }
+  ],
   "users": [
     {
       "id": 1,
