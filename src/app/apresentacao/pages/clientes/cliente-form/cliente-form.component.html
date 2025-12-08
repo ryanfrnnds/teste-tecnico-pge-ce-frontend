@@ -50,13 +50,20 @@
       <div class="col-12 sm:col-6 md:col-4 xl:col-3 field">
         <p-floatLabel variant="on">
           @if (store.telefoneMask()) {
-            <p-inputMask id="telefone" formControlName="telefone" [mask]="store.telefoneMask()!" styleClass="w-full" class="w-full"></p-inputMask>
+            <p-inputMask 
+              id="telefone" 
+              formControlName="telefone" 
+              [mask]="store.telefoneMask()!" 
+              styleClass="w-full" 
+              class="w-full"
+              [autoClear]="false">
+            </p-inputMask>
           } @else {
             <input pInputText id="telefone" type="text" formControlName="telefone" class="w-full" />
           }
           <label for="telefone">Telefone</label>
         </p-floatLabel>
-        @if (telefone.invalid && (telefone.dirty || telefone.touched)) {
+        @if (telefone.invalid && telefone.dirty) {
           <div class="alert p-error">
             @if (telefone.hasError('required')) { <div>Obrigatório.</div> }
           </div>

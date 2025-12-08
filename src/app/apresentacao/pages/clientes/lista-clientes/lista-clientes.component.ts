@@ -1,6 +1,8 @@
-import { Component, inject, isDevMode } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -14,9 +16,12 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ToolbarModule } from 'primeng/toolbar';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ConfirmModalComponent } from '@apresentacao/components/confirm-modal/confirm-modal.component';
+import { ListaPageContainerComponent } from '@apresentacao/components/lista-page-container/lista-page-container.component';
+import { ListaPageTableWrapperComponent } from '@apresentacao/components/lista-page-container/lista-page-container-table-wrapper.component';
 import { MaskCpfPipe } from '@apresentacao/pipes/mask-cpf.pipe';
 import { MaskEmailPipe } from '@apresentacao/pipes/mask-email.pipe';
 import { MaskPhonePipe } from '@apresentacao/pipes/mask-phone.pipe';
+import { GlobalPaginatorService } from '@infraestrutura/services/global-paginator.service';
 import { ListaClientesStore } from './lista-clientes.store';
 import { Cliente } from '@dominio/models/cliente.model';
 
@@ -39,6 +44,8 @@ import { Cliente } from '@dominio/models/cliente.model';
     TooltipModule,
     FloatLabelModule,
     ConfirmModalComponent,
+    ListaPageContainerComponent,
+    ListaPageTableWrapperComponent,
     MaskCpfPipe,
     MaskEmailPipe,
     MaskPhonePipe
@@ -47,10 +54,10 @@ import { Cliente } from '@dominio/models/cliente.model';
   templateUrl: './lista-clientes.component.html',
   styleUrl: './lista-clientes.component.scss'
 })
-export class ListaClientesComponent {
-  readonly ambienteDesenvolvimento = isDevMode();
-
+export class ListaClientesComponent implements OnInit, OnDestroy {
   private readonly store = inject(ListaClientesStore);
+  private readonly globalPaginatorService = inject(GlobalPaginatorService);
+  private readonly router = inject(Router);
 
   readonly clientes = this.store.clientes;
   readonly filtrosForm = this.store.filtrosForm;
@@ -59,8 +66,8 @@ export class ListaClientesComponent {
   readonly carregando$ = this.store.carregando$;
   readonly filtroStatus = this.store.filtroStatus;
   readonly clientesSelecionados = this.store.clientesSelecionados;
-  readonly modalExclusaoVisible = this.store.modalExclusaoVisible;
-  readonly clienteParaExcluir = this.store.clienteParaExcluir;
+  readonly modalConfirmacaoVisible = this.store.modalConfirmacaoVisible;
+  readonly clienteParaAlterar = this.store.clienteParaAlterar;
   readonly contagemTotal = this.store.contagemTotal;
   readonly contagemAtivos = this.store.contagemAtivos;
   readonly contagemInativos = this.store.contagemInativos;
@@ -69,6 +76,13 @@ export class ListaClientesComponent {
   readonly modoReativacao = this.store.modoReativacao;
   readonly skeletonArray = this.store.skeletonArray;
 
+  /**
+   * Retorna um array de objetos vazios para exibir skeleton quando carregando
+   */
+  getSkeletonArray(): any[] {
+    return Array(this.paginatorState().rows).fill({});
+  }
+
   limparCampo(campo: 'nome' | 'cidade'): void {
     const control = this.filtrosForm.get(campo);
     if (control) {
@@ -76,38 +90,73 @@ export class ListaClientesComponent {
     }
   }
 
-  get modalExclusaoVisibleModel(): boolean {
-    return this.modalExclusaoVisible();
+  constructor() {
+    effect(() => {
+      const state = this.paginatorState();
+      const total = this.totalRegistrosFiltrados();
+      
+      if (state && total !== undefined) {
+        this.globalPaginatorService.setPaginatorState(
+          {
+            rows: state.rows,
+            first: state.first,
+            totalRecords: total,
+            rowsPerPageOptions: [10, 20, 50],
+            showFirstLastIcon: true
+          },
+          (event) => this.onMudancaPagina(event)
+        );
+      }
+    });
   }
 
-  set modalExclusaoVisibleModel(value: boolean) {
-    this.modalExclusaoVisible.set(value);
+  ngOnInit(): void {
+    const state = this.paginatorState();
+    const total = this.totalRegistrosFiltrados();
+    
+    if (state && total !== undefined) {
+      this.globalPaginatorService.setPaginatorState(
+        {
+          rows: state.rows,
+          first: state.first,
+          totalRecords: total,
+          rowsPerPageOptions: [10, 20, 50],
+          showFirstLastIcon: true
+        },
+        (event) => this.onMudancaPagina(event)
+      );
+    }
+
+    let ultimaUrl = this.router.url;
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      filter(event => {
+        const urlAtual = event.urlAfterRedirects;
+        const isClientesRoute = urlAtual === '/clientes' || urlAtual.startsWith('/clientes?');
+        const mudouRota = urlAtual !== ultimaUrl;
+        ultimaUrl = urlAtual;
+        return isClientesRoute && mudouRota;
+      })
+    ).subscribe(() => {
+      const filtros = this.store.filtrosSignal();
+      const status = this.store.filtroStatus();
+      
+      this.store.filtrosSignal.set({ ...filtros });
+      this.store.filtroStatus.set(status);
+    });
   }
 
-  get clientesSelecionadosModel(): Cliente[] {
-    return this.clientesSelecionados();
+  ngOnDestroy(): void {
+    this.globalPaginatorService.clearPaginatorState();
   }
 
-  set clientesSelecionadosModel(value: Cliente[]) {
-    this.clientesSelecionados.set(value);
+
+  async filtrarPorStatus(status: 'ativos' | 'inativos' | 'todos'): Promise<void> {
+    await this.store.filtrarPorStatus(status);
   }
 
-  constructor() {}
-
-  aoPesquisar(): void {
-    this.store.aplicarFiltros();
-  }
-
-  aplicarFiltros(): void {
-    this.store.aplicarFiltros();
-  }
-
-  filtrarPorStatus(status: 'ativos' | 'inativos' | 'todos'): void {
-    this.store.filtrarPorStatus(status);
-  }
-
-  onMudancaPagina(event: any): void {
-    this.store.onMudancaPagina(event);
+  async onMudancaPagina(event: any): Promise<void> {
+    await this.store.onMudancaPagina(event);
   }
 
   onLinhaClienteClick(cliente: any): void {
@@ -118,24 +167,20 @@ export class ListaClientesComponent {
     this.store.editarCliente(cliente);
   }
 
-  confirmarAlteracaoStatus(cliente: any): void {
-    this.store.confirmarAlteracaoStatus(cliente);
+  abrirModalAlteracaoStatus(cliente: Cliente): void {
+    this.store.abrirModalAlteracaoStatus(cliente);
   }
 
-  executarAlteracaoStatus(): void {
-    this.store.executarAlteracaoStatus();
+  abrirModalAlteracaoStatusEmMassa(): void {
+    this.store.abrirModalAlteracaoStatusEmMassa();
   }
 
-  cancelarExclusao(): void {
-    this.store.cancelarExclusao();
+  async executarAlteracaoStatus(): Promise<void> {
+    await this.store.executarAlteracaoStatus();
   }
 
-  confirmarExclusaoEmMassa(): void {
-    this.store.executarExclusaoEmMassa();
-  }
-
-  executarExclusaoEmMassa(): void {
-    this.store.executarExclusaoEmMassa();
+  cancelarAlteracaoStatus(): void {
+    this.store.cancelarAlteracaoStatus();
   }
 
   limparFiltros(): void {
@@ -146,7 +191,4 @@ export class ListaClientesComponent {
     this.store.novoCliente();
   }
 
-  inserirClientesTeste(): void {
-    this.store.inserirClientesTeste();
-  }
 }

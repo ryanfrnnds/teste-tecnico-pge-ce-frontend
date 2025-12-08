@@ -1,0 +1,123 @@
+.lista-page-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
+.lista-page-table-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  flex: 1;
+}
+
+.lista-page-table-content ::ng-deep .p-datatable {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.lista-page-table-content ::ng-deep p-table {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-page-table-content ::ng-deep .p-datatable .p-datatable-header {
+  flex-shrink: 0;
+}
+
+.lista-page-table-content ::ng-deep .p-datatable .p-datatable-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  min-height: 0;
+  max-height: 100%;
+  display: block;
+  position: relative;
+}
+
+.lista-page-table-content ::ng-deep .p-datatable .p-datatable-table {
+  width: 100%;
+  table-layout: auto;
+}
+
+.lista-page-table-content ::ng-deep .p-datatable .p-datatable-thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--surface-ground);
+}
+
+.lista-page-table-content ::ng-deep .p-datatable .p-datatable-tbody {
+  display: table-row-group;
+}
+
+.lista-page-table-wrapper ::ng-deep .status-filter-icon {
+  position: relative;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: scale(1.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  &.active {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(var(--primary-color-rgb), 0.15);
+    border-color: var(--primary-color);
+  }
+
+  i {
+    transition: all 0.2s ease;
+  }
+
+  .status-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.total-badge {
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+
+    &.active-badge {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    &.inactive-badge {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+  }
+}

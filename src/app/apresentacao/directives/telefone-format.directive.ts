@@ -3,6 +3,7 @@ import {
   ElementRef,
   Input,
   OnInit,
+  AfterViewInit,
   OnChanges,
   SimpleChanges,
   Renderer2
@@ -16,7 +17,7 @@ import {
   selector: '[appTelefoneFormat]',
   standalone: true
 })
-export class TelefoneFormatDirective implements OnInit, OnChanges {
+export class TelefoneFormatDirective implements OnInit, AfterViewInit, OnChanges {
 
   /**
    * Método estático para formatação de telefone
@@ -91,6 +92,13 @@ export class TelefoneFormatDirective implements OnInit, OnChanges {
     }
   }
 
+  ngAfterViewInit() {
+    // Verificar e formatar conteúdo inicial após a view estar inicializada
+    if (!this.isInputElement) {
+      this.formatInitialContent();
+    }
+  }
+
   private isPrimeNGComponent(element: any): boolean {
     let current = element;
     while (current) {
@@ -132,13 +140,26 @@ export class TelefoneFormatDirective implements OnInit, OnChanges {
         subtree: true
       });
     }
+  }
 
-    setTimeout(() => {
-      const textContent = element.textContent?.trim();
-      if (textContent && !element.hasAttribute('data-formatted')) {
+  private formatInitialContent() {
+    const element = this.elementRef.nativeElement;
+    const textContent = element.textContent?.trim();
+    
+    if (textContent && !element.hasAttribute('data-formatted')) {
+      // Usar requestAnimationFrame para garantir que o DOM esteja pronto
+      // É mais confiável que setTimeout pois está sincronizado com o ciclo de renderização
+      if (typeof requestAnimationFrame !== 'undefined') {
+        requestAnimationFrame(() => {
+          if (!element.hasAttribute('data-formatted')) {
+            this.updateContent(textContent);
+          }
+        });
+      } else {
+        // Fallback para navegadores antigos (muito raro)
         this.updateContent(textContent);
       }
-    }, 0);
+    }
   }
 
   private setupInputElement() {

@@ -38,12 +38,12 @@
  *   de carregamento que descrevem como a tela está em cada momento.
  */
 
-import { Injectable, computed, signal, effect, inject } from '@angular/core';
+import { Injectable, computed, signal, effect, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
-import { firstValueFrom, debounceTime, distinctUntilChanged } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom, debounceTime, distinctUntilChanged, take } from 'rxjs';
 import { Cliente } from '@dominio/models/cliente.model';
 import { ClienteService } from '@infraestrutura/services/cliente.service';
 import { LoadingService } from '@infraestrutura/services/loading.service';
@@ -58,27 +58,29 @@ export class ListaClientesStore {
   private readonly messageService = inject(MessageService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly clientes = signal<Cliente[]>([]);
   readonly paginaAtual = signal(0);
   readonly registrosPorPagina = signal(10);
   readonly filtroStatus = signal<'ativos' | 'inativos' | 'todos'>('ativos');
   readonly clientesSelecionados = signal<Cliente[]>([]);
-  readonly modalExclusaoVisible = signal(false);
-  readonly clienteParaExcluir = signal<Cliente | null>(null);
+  readonly modalConfirmacaoVisible = signal(false);
+  readonly clienteParaAlterar = signal<Cliente | null>(null);
 
   readonly filtrosForm = this.fb.group({
     nome: [''],
     cidade: ['']
   });
 
-  private readonly filtrosSignal = toSignal(
-    this.filtrosForm.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ),
-    { initialValue: this.filtrosForm.getRawValue() }
-  );
+  readonly filtrosSignal = signal<{ nome: string; cidade: string }>({
+    nome: '',
+    cidade: ''
+  });
+
+  private primeiraExecucao = true;
+  private buscaManualEmAndamento = false;
+  private ultimaExecucaoEffect: { pagina: number; limite: number; status: string; nome: string; cidade: string } | null = null;
 
   readonly paginatorState = computed(() => {
     const first = this.paginaAtual();
@@ -119,6 +121,23 @@ export class ListaClientesStore {
   );
 
   constructor() {
+    this.filtrosForm.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged((prev, curr) => {
+        const prevNome = (prev?.nome || '').trim();
+        const prevCidade = (prev?.cidade || '').trim();
+        const currNome = (curr?.nome || '').trim();
+        const currCidade = (curr?.cidade || '').trim();
+        return prevNome === currNome && prevCidade === currCidade;
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(valores => {
+      this.filtrosSignal.set({
+        nome: valores.nome || '',
+        cidade: valores.cidade || ''
+      });
+    });
+
     const snapshotParams = this.route.snapshot.queryParams;
     const hasUrlState = this.hasAnyQueryParam(snapshotParams);
     const storedParams = this.getStoredQueryParams();
@@ -137,8 +156,10 @@ export class ListaClientesStore {
         nome: initialParams['nome'] ?? '',
         cidade: initialParams['cidade'] ?? ''
       },
-      { emitEvent: true }
+      { emitEvent: false }
     );
+
+    this.filtrosSignal.set(this.filtrosForm.getRawValue());
 
     if (!hasUrlState && storedParams) {
       this.router.navigate([], {
@@ -178,23 +199,61 @@ export class ListaClientesStore {
       });
     }, { allowSignalWrites: true });
 
+    Promise.resolve().then(() => {
+      this.loadingService.iniciar();
+      this.buscarDadosIniciais().finally(() => {
+        this.loadingService.finalizar();
+        this.primeiraExecucao = false;
+      });
+    });
+
     effect(async () => {
+      if (this.primeiraExecucao || this.buscaManualEmAndamento) {
+        return;
+      }
+
       const pagina = this.paginaAtual();
       const limite = this.registrosPorPagina();
       const status = this.filtroStatus();
       const filtros = this.filtrosSignal();
 
+      const nomeFiltro = (filtros?.nome?.trim() || '');
+      const cidadeFiltro = (filtros?.cidade?.trim() || '');
+
+      const execucaoAtual = { pagina, limite, status, nome: nomeFiltro, cidade: cidadeFiltro };
+      if (this.ultimaExecucaoEffect && 
+          this.ultimaExecucaoEffect.pagina === execucaoAtual.pagina &&
+          this.ultimaExecucaoEffect.limite === execucaoAtual.limite &&
+          this.ultimaExecucaoEffect.status === execucaoAtual.status &&
+          this.ultimaExecucaoEffect.nome === execucaoAtual.nome &&
+          this.ultimaExecucaoEffect.cidade === execucaoAtual.cidade) {
+        return;
+      }
+
+      const mudouFiltros = !this.ultimaExecucaoEffect || (
+        this.ultimaExecucaoEffect.nome !== nomeFiltro || 
+        this.ultimaExecucaoEffect.cidade !== cidadeFiltro ||
+        this.ultimaExecucaoEffect.status !== status
+      );
+      
+      this.ultimaExecucaoEffect = execucaoAtual;
+
       this.loadingService.iniciar();
       try {
         await this.buscarClientes({
-          nome: filtros?.nome || undefined,
-          cidade: filtros?.cidade || undefined,
+          nome: nomeFiltro || undefined,
+          cidade: cidadeFiltro || undefined,
           status,
           pagina: Math.floor(pagina / limite),
           limite
         });
-        await this.buscarContagensTotais();
-        await this.buscarTotalGeralSistema();
+        
+        if (mudouFiltros) {
+          await Promise.all([
+            this.buscarContagensTotais(),
+            this.buscarTotalGeralSistema()
+          ]);
+        }
       } finally {
         this.loadingService.finalizar();
       }
@@ -223,6 +282,72 @@ export class ListaClientesStore {
       if (typeof window === 'undefined') return;
       window.sessionStorage.setItem(CLIENTES_QUERY_STORAGE_KEY, JSON.stringify(params));
     } catch {
+    }
+  }
+
+  /**
+   * Busca todos os dados iniciais de forma otimizada
+   * Faz apenas 2 chamadas: uma para clientes paginados e outra para contagens/total
+   */
+  private async buscarDadosIniciais(): Promise<void> {
+    try {
+      const nomeFiltro = this.filtrosForm.value.nome || undefined;
+      const cidadeFiltro = this.filtrosForm.value.cidade || undefined;
+      const status = this.filtroStatus();
+      const pagina = Math.floor(this.paginaAtual() / this.registrosPorPagina());
+      const limite = this.registrosPorPagina();
+
+      const resultadoClientes = await firstValueFrom(
+        this.clienteService.buscarComFiltros({
+          nome: nomeFiltro,
+          cidade: cidadeFiltro,
+          status,
+          pagina,
+          limite
+        })
+      );
+
+      this.clientes.set(resultadoClientes.clientes);
+      this.totalRegistrosFiltrados.set(resultadoClientes.total);
+
+      if (nomeFiltro || cidadeFiltro) {
+        const [totalGeral, resultadoContagens] = await Promise.all([
+          firstValueFrom(this.clienteService.contarTotalGeral()),
+          firstValueFrom(
+            this.clienteService.buscarComFiltros({
+              nome: nomeFiltro,
+              cidade: cidadeFiltro,
+              status: 'todos',
+              pagina: undefined,
+              limite: undefined
+            })
+          )
+        ]);
+        this.totalGeralSistema.set(totalGeral);
+        this.contagemTotal.set(resultadoContagens.clientes.length);
+        this.contagemAtivos.set(resultadoContagens.clientes.filter(c => c.ativo === true).length);
+        this.contagemInativos.set(resultadoContagens.clientes.filter(c => c.ativo === false).length);
+      } else {
+        const resultadoTodos = await firstValueFrom(
+          this.clienteService.buscarComFiltros({
+            status: 'todos',
+            pagina: undefined,
+            limite: undefined
+          })
+        );
+        this.totalGeralSistema.set(resultadoTodos.total);
+        this.contagemTotal.set(resultadoTodos.clientes.length);
+        this.contagemAtivos.set(resultadoTodos.clientes.filter(c => c.ativo === true).length);
+        this.contagemInativos.set(resultadoTodos.clientes.filter(c => c.ativo === false).length);
+      }
+
+    } catch (erro) {
+      console.error('Erro ao carregar dados iniciais', erro);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Erro ao carregar dados'
+      });
     }
   }
 
@@ -295,88 +420,72 @@ export class ListaClientesStore {
     }
   }
 
-  async aplicarFiltros(): Promise<void> {
-    this.paginaAtual.set(0);
-  }
 
   async filtrarPorStatus(status: 'ativos' | 'inativos' | 'todos'): Promise<void> {
+    this.buscaManualEmAndamento = true;
     this.filtroStatus.set(status);
     this.clientesSelecionados.set([]);
     this.paginaAtual.set(0);
-  }
-
-  onMudancaPagina(event: any): void {
-    this.paginaAtual.set(event.first);
-    this.registrosPorPagina.set(event.rows);
-  }
-
-  async executarExclusaoEmMassa(): Promise<void> {
-    if (this.clientesSelecionados().length === 0) return;
-
-    if (this.modoReativacao()) {
-      await this._reativarClientes();
-    } else {
-      await this._desativarClientes();
-    }
-  }
-
-  private async _reativarClientes(): Promise<void> {
+    
+    const filtros = this.filtrosSignal();
+    const nomeFiltro = (filtros?.nome?.trim() || '');
+    const cidadeFiltro = (filtros?.cidade?.trim() || '');
+    this.ultimaExecucaoEffect = { pagina: 0, limite: this.registrosPorPagina(), status, nome: nomeFiltro, cidade: cidadeFiltro };
+    
+    this.loadingService.iniciar();
     try {
-      const promises = this.clientesSelecionados().map(cliente =>
-        firstValueFrom(this.clienteService.atualizar(cliente.id, { ativo: true }))
-      );
-
-      await Promise.all(promises);
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Sucesso',
-        detail: `${this.clientesSelecionados().length} cliente(s) reativado(s) com sucesso`
+      await this.buscarClientes({
+        nome: nomeFiltro || undefined,
+        cidade: cidadeFiltro || undefined,
+        status,
+        pagina: 0,
+        limite: this.registrosPorPagina()
       });
-
-      this.clientesSelecionados.set([]);
-      await this.buscarClientes();
-      await this.buscarContagensTotais();
-      await this.buscarTotalGeralSistema();
-      this.modalExclusaoVisible.set(false);
-
-    } catch {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'Erro ao reativar clientes selecionados'
-      });
+      
+      await Promise.all([
+        this.buscarContagensTotais(),
+        this.buscarTotalGeralSistema()
+      ]);
+    } finally {
+      this.loadingService.finalizar();
+      this.buscaManualEmAndamento = false;
     }
   }
 
-  private async _desativarClientes(): Promise<void> {
+  async onMudancaPagina(event: any): Promise<void> {
+    const novaPagina = event.first;
+    const novoLimite = event.rows;
+    
+    this.buscaManualEmAndamento = true;
+    this.paginaAtual.set(novaPagina);
+    this.registrosPorPagina.set(novoLimite);
+    
+    const filtros = this.filtrosSignal();
+    const nomeFiltro = (filtros?.nome?.trim() || '');
+    const cidadeFiltro = (filtros?.cidade?.trim() || '');
+    this.ultimaExecucaoEffect = { 
+      pagina: novaPagina, 
+      limite: novoLimite, 
+      status: this.filtroStatus(), 
+      nome: nomeFiltro, 
+      cidade: cidadeFiltro 
+    };
+    
+    this.loadingService.iniciar();
     try {
-      const promises = this.clientesSelecionados().map(cliente =>
-        firstValueFrom(this.clienteService.excluir(cliente.id))
-      );
-
-      await Promise.all(promises);
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Sucesso',
-        detail: `${this.clientesSelecionados().length} cliente(s) marcado(s) como inativo(s) com sucesso`
+      await this.buscarClientes({
+        nome: nomeFiltro || undefined,
+        cidade: cidadeFiltro || undefined,
+        status: this.filtroStatus(),
+        pagina: Math.floor(novaPagina / novoLimite),
+        limite: novoLimite
       });
-
-      this.clientesSelecionados.set([]);
-      await this.buscarClientes();
-      await this.buscarContagensTotais();
-      await this.buscarTotalGeralSistema();
-      this.modalExclusaoVisible.set(false);
-
-    } catch {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'Erro ao inativar clientes selecionados'
-      });
+    } finally {
+      this.loadingService.finalizar();
+      this.buscaManualEmAndamento = false;
     }
   }
+
 
   limparFiltros(): void {
     this.filtrosForm.reset({
@@ -394,77 +503,130 @@ export class ListaClientesStore {
     this.router.navigate(['/clientes', cliente.id, 'editar']);
   }
 
-  confirmarAlteracaoStatus(cliente: Cliente): void {
-    this.clienteParaExcluir.set(cliente);
-    this.modalExclusaoVisible.set(true);
+  abrirModalAlteracaoStatus(cliente: Cliente): void {
+    if (!cliente) return;
+    this.clienteParaAlterar.set(cliente);
+    this.modalConfirmacaoVisible.set(true);
+  }
+
+  abrirModalAlteracaoStatusEmMassa(): void {
+    if (this.clientesSelecionados().length === 0) return;
+    this.clienteParaAlterar.set(null);
+    this.modalConfirmacaoVisible.set(true);
   }
 
   async executarAlteracaoStatus(): Promise<void> {
-    const cliente = this.clienteParaExcluir();
-    if (!cliente) return;
+    const cliente = this.clienteParaAlterar();
+    
+    if (cliente) {
+      await this._alterarStatusCliente(cliente);
+    } else {
+      await this._alterarStatusEmMassa();
+    }
+  }
 
-    const novoStatusAtivo = !cliente.ativo;
-    const acao = novoStatusAtivo ? 'reativar' : 'inativar';
+  cancelarAlteracaoStatus(): void {
+    this.modalConfirmacaoVisible.set(false);
+    this.clienteParaAlterar.set(null);
+  }
+
+  private async _alterarStatusCliente(cliente: Cliente): Promise<void> {
+    const novoStatus = !cliente.ativo;
+    const acao = novoStatus ? 'reativar' : 'inativar';
 
     try {
-      if (novoStatusAtivo) {
-        await firstValueFrom(this.clienteService.atualizar(cliente.id, { ativo: true }));
-      } else {
-        await firstValueFrom(this.clienteService.excluir(cliente.id));
-      }
+      await firstValueFrom(this.clienteService.atualizar(cliente.id, { ativo: novoStatus }));
 
       this.messageService.add({
         severity: 'success',
         summary: 'Sucesso',
-        detail: `Cliente ${novoStatusAtivo ? 'reativado' : 'inativado'} com sucesso`
+        detail: `Cliente "${cliente.nome}" ${novoStatus ? 'reativado' : 'inativado'} com sucesso`
       });
 
-      await this.buscarClientes();
-      await this.buscarContagensTotais();
-      this.modalExclusaoVisible.set(false);
-      this.clienteParaExcluir.set(null);
-      await this.buscarTotalGeralSistema();
+      await this._atualizarListaAposOperacao();
+      this.cancelarAlteracaoStatus();
 
     } catch (erro) {
       console.error(`Erro ao ${acao} cliente`, erro);
       this.messageService.add({
         severity: 'error',
         summary: 'Erro',
-        detail: `Erro ao ${acao} cliente`
+        detail: `Erro ao ${acao} cliente "${cliente.nome}"`
       });
+      this.cancelarAlteracaoStatus();
     }
   }
 
-  cancelarExclusao(): void {
-    this.modalExclusaoVisible.set(false);
-    this.clienteParaExcluir.set(null);
-    this.clientesSelecionados.set([]);
+  private async _alterarStatusEmMassa(): Promise<void> {
+    const clientes = this.clientesSelecionados();
+    if (clientes.length === 0) {
+      this.cancelarAlteracaoStatus();
+      return;
+    }
+
+    const isReativacao = this.modoReativacao();
+    const acao = isReativacao ? 'reativar' : 'inativar';
+
+    try {
+      if (isReativacao) {
+        const promises = clientes.map(cliente =>
+          firstValueFrom(this.clienteService.atualizar(cliente.id, { ativo: true }))
+        );
+        await Promise.all(promises);
+      } else {
+        await firstValueFrom(this.clienteService.inativarEmLote(clientes));
+      }
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: `${clientes.length} cliente(s) ${isReativacao ? 'reativado(s)' : 'inativado(s)'} com sucesso`
+      });
+
+      this.clientesSelecionados.set([]);
+      await this._atualizarListaAposOperacao();
+      this.cancelarAlteracaoStatus();
+
+    } catch (erro) {
+      console.error(`Erro ao ${acao} clientes em massa`, erro);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro',
+        detail: `Erro ao ${acao} clientes selecionados`
+      });
+      this.cancelarAlteracaoStatus();
+    }
+  }
+
+  private async _atualizarListaAposOperacao(): Promise<void> {
+    this.buscaManualEmAndamento = true;
+    
+    const filtros = this.filtrosSignal();
+    const nomeFiltro = (filtros?.nome?.trim() || '');
+    const cidadeFiltro = (filtros?.cidade?.trim() || '');
+    const pagina = this.paginaAtual();
+    const limite = this.registrosPorPagina();
+    const status = this.filtroStatus();
+    
+    this.ultimaExecucaoEffect = { pagina, limite, status, nome: nomeFiltro, cidade: cidadeFiltro };
+    
+    await Promise.all([
+      this.buscarClientes({
+        nome: nomeFiltro || undefined,
+        cidade: cidadeFiltro || undefined,
+        status,
+        pagina: Math.floor(pagina / limite),
+        limite
+      }),
+      this.buscarContagensTotais(),
+      this.buscarTotalGeralSistema()
+    ]);
+    
+    this.buscaManualEmAndamento = false;
   }
 
   novoCliente(): void {
     this.router.navigate(['/clientes/novo']);
   }
 
-  async inserirClientesTeste(): Promise<void> {
-    this.loadingService.iniciar();
-    try {
-      await firstValueFrom(this.clienteService.popularMockClientes());
-      await this.buscarClientes();
-      await this.buscarContagensTotais();
-      await this.buscarTotalGeralSistema();
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Sucesso',
-        detail: 'Clientes de teste inseridos com sucesso'
-      });
-    } catch {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'Erro ao inserir clientes de teste'
-      });
-    } finally {
-      this.loadingService.finalizar();
-    }
-  }
 }

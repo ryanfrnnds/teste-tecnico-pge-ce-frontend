@@ -1,0 +1,51 @@
+.lista-page-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--surface-ground);
+  gap: 0.75rem;
+}
+
+.lista-page-header {
+  flex-shrink: 0;
+}
+
+.lista-page-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  gap: 0.75rem;
+}
+
+.lista-page-filters {
+  flex-shrink: 0;
+}
+
+.lista-page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.lista-page-paginator-footer {
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+  
+  ::ng-deep .p-paginator {
+    background: transparent;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    width: auto;
+    min-width: auto;
+  }
+}
+

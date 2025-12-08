@@ -1,0 +1,21 @@
+<div class="lista-page-container">
+  <ng-content></ng-content>
+  <div class="lista-page-header">
+    <ng-content select="[slot=header]"></ng-content>
+  </div>
+
+  <div class="lista-page-body">
+    <div class="lista-page-filters">
+      <ng-content select="[slot=filters]"></ng-content>
+    </div>
+
+    <div class="lista-page-content">
+      <ng-content select="[slot=content]"></ng-content>
+    </div>
+  </div>
+
+  <div class="lista-page-paginator-footer">
+    <ng-content select="[slot=paginator]"></ng-content>
+  </div>
+</div>
+

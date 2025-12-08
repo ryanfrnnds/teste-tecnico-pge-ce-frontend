@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -31,13 +31,41 @@ import { ClienteFormStore } from './cliente-form.store';
   templateUrl: './cliente-form.component.html',
   styleUrls: ['./cliente-form.component.scss']
 })
-export class ClienteFormComponent implements OnInit {
+export class ClienteFormComponent implements OnInit, AfterViewInit {
   readonly store = inject(ClienteFormStore);
   private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
+    const formData = this.route.snapshot.data['formData'] as { cliente: any; paises: any[]; estados: any[]; municipios: any[] } | undefined;
     const id = this.route.snapshot.paramMap.get('id');
-    this.store.init(id);
+    
+    if (formData) {
+      // Usar dados do resolver
+      this.store.initComDados(id, formData);
+    } else {
+      // Fallback para quando não há resolver (novo cliente)
+      this.store.init(id);
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // Garantir que o campo telefone não seja marcado como touched ou dirty após a renderização
+    // O p-inputMask pode marcar o campo como dirty ao renderizar, então precisamos resetar
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const telefoneControl = this.store.form.get('telefone');
+          if (telefoneControl) {
+            // Se o campo está vazio e foi marcado como dirty pelo componente, resetar
+            const valor = telefoneControl.value;
+            if ((valor === '' || valor === null || valor === undefined) && telefoneControl.dirty) {
+              telefoneControl.markAsPristine();
+              telefoneControl.markAsUntouched();
+            }
+          }
+        });
+      });
+    }
   }
 
   get form() { return this.store.form; }

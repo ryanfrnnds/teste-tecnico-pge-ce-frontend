@@ -154,36 +154,54 @@ describe('ClienteService', () => {
      * Deve aplicar filtro de cidade usando endereco.cidade_like.
      */
     it('deve aplicar filtro de cidade', () => {
-      service.buscarComFiltros({ cidade: 'São Paulo' }).subscribe();
+      let result: any;
+      service.buscarComFiltros({ cidade: 'São Paulo' }).subscribe(data => {
+        result = data;
+      });
 
       const req = httpMock.expectOne(req =>
         req.params.get('endereco.cidade_like') === 'São Paulo'
       );
+      expect(req.request.method).toBe('GET');
       req.flush([], { headers: { 'x-total-count': '0' } });
+      expect(result.clientes).toEqual([]);
+      expect(result.total).toBe(0);
     });
 
     /**
      * Deve aplicar filtro para clientes ativos (ativo=true).
      */
     it('deve aplicar filtro de status ativos', () => {
-      service.buscarComFiltros({ status: 'ativos' }).subscribe();
+      let result: any;
+      service.buscarComFiltros({ status: 'ativos' }).subscribe(data => {
+        result = data;
+      });
 
       const req = httpMock.expectOne(req =>
         req.params.get('ativo') === 'true'
       );
+      expect(req.request.method).toBe('GET');
       req.flush([], { headers: { 'x-total-count': '0' } });
+      expect(result.clientes).toEqual([]);
+      expect(result.total).toBe(0);
     });
 
     /**
      * Deve aplicar filtro para clientes inativos (ativo=false).
      */
     it('deve aplicar filtro de status inativos', () => {
-      service.buscarComFiltros({ status: 'inativos' }).subscribe();
+      let result: any;
+      service.buscarComFiltros({ status: 'inativos' }).subscribe(data => {
+        result = data;
+      });
 
       const req = httpMock.expectOne(req =>
         req.params.get('ativo') === 'false'
       );
+      expect(req.request.method).toBe('GET');
       req.flush([], { headers: { 'x-total-count': '0' } });
+      expect(result.clientes).toEqual([]);
+      expect(result.total).toBe(0);
     });
 
     /**
@@ -204,13 +222,19 @@ describe('ClienteService', () => {
      * Deve converter página 0-based para 1-based (json-server) e aplicar limite.
      */
     it('deve aplicar paginação', () => {
-      service.buscarComFiltros({ pagina: 1, limite: 20 }).subscribe();
+      let result: any;
+      service.buscarComFiltros({ pagina: 1, limite: 20 }).subscribe(data => {
+        result = data;
+      });
 
       const req = httpMock.expectOne(req =>
         req.params.get('_page') === '2' &&
         req.params.get('_limit') === '20'
       );
+      expect(req.request.method).toBe('GET');
       req.flush([], { headers: { 'x-total-count': '0' } });
+      expect(result.clientes).toEqual([]);
+      expect(result.total).toBe(0);
     });
 
     /**
@@ -364,6 +388,93 @@ describe('ClienteService', () => {
       expect(req.request.method).toBe('PATCH');
       expect(req.request.body).toEqual({ ativo: false });
       req.flush(mockCliente);
+    });
+  });
+
+  /**
+   * Testes para o método inativarEmLote().
+   * Verifica inativação em massa de clientes e logging automático.
+   */
+  describe('inativarEmLote', () => {
+    /**
+     * Deve fazer PATCH para /api/clientes/bulk-inactivate com lista de IDs.
+     */
+    it('deve fazer PATCH para inativar múltiplos clientes', () => {
+      service.inativarEmLote(mockClientes).subscribe();
+
+      const req = httpMock.expectOne('/api/clientes/bulk-inactivate');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual({ ids: ['1', '2'] });
+      req.flush(null);
+    });
+
+    /**
+     * Deve retornar undefined quando lista está vazia.
+     */
+    it('deve retornar undefined quando lista está vazia', (done) => {
+      service.inativarEmLote([]).subscribe(result => {
+        expect(result).toBeUndefined();
+        done();
+      });
+    });
+  });
+
+  /**
+   * Testes para logging automático via decorator.
+   * Verifica se logs são registrados corretamente para diferentes ações.
+   * Nota: O logging é feito via decorator, então não podemos testar diretamente aqui.
+   * Os testes verificam que as chamadas HTTP são feitas corretamente.
+   */
+  describe('logging automático', () => {
+    /**
+     * Deve fazer PATCH para inativar cliente (deve registrar log de INATIVACAO via decorator).
+     */
+    it('deve fazer PATCH para inativar cliente (deve registrar log de INATIVACAO via decorator)', () => {
+      const updates = { ativo: false };
+      let cliente: any;
+      service.atualizar('1', updates).subscribe(data => {
+        cliente = data;
+      });
+
+      const req = httpMock.expectOne('/api/clientes/1');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual(updates);
+      req.flush({ ...mockCliente, ativo: false });
+      expect(cliente.ativo).toBe(false);
+    });
+
+    /**
+     * Deve fazer PATCH para reativar cliente (deve registrar log de ATUALIZACAO via decorator).
+     */
+    it('deve fazer PATCH para reativar cliente (deve registrar log de ATUALIZACAO via decorator)', () => {
+      const updates = { ativo: true };
+      let cliente: any;
+      service.atualizar('2', updates).subscribe(data => {
+        cliente = data;
+      });
+
+      const req = httpMock.expectOne('/api/clientes/2');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual(updates);
+      req.flush({ ...mockClientes[1], ativo: true });
+      expect(cliente.ativo).toBe(true);
+    });
+
+    /**
+     * Deve fazer PATCH para outras atualizações (deve registrar log de ATUALIZACAO via decorator).
+     */
+    it('deve fazer PATCH para outras atualizações (deve registrar log de ATUALIZACAO via decorator)', () => {
+      const updates = { nome: 'Novo Nome' };
+      let cliente: any;
+      service.atualizar('1', updates).subscribe(data => {
+        cliente = data;
+      });
+
+      const req = httpMock.expectOne('/api/clientes/1');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toEqual(updates);
+      req.flush({ ...mockCliente, nome: 'Novo Nome' });
+      expect(cliente.nome).toBe('Novo Nome');
     });
   });
 });

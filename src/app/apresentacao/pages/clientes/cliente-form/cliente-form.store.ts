@@ -102,6 +102,24 @@ export class ClienteFormStore {
     });
   }
 
+  initComDados(idCliente: string | null, formData: { cliente: any; paises: any[]; estados: any[]; municipios: any[] }): void {
+    this.carregando.set(true);
+    
+    this.paises.set(formData.paises);
+    this.estados.set(formData.estados);
+    this.municipios.set(formData.municipios);
+
+    if (formData.cliente) {
+      this.modo.set('edicao');
+      this.preencherFormulario(formData.cliente);
+    } else {
+      this.modo.set('novo');
+      this.inicializarFormularioNovo();
+    }
+    
+    this.carregando.set(false);
+  }
+
   init(idCliente: string | null) {
     this.carregando.set(true);
 
@@ -153,7 +171,37 @@ export class ClienteFormStore {
         cidade: ''
       }
     });
-    this.onPaisChange('BR'); 
+    
+    // Garantir que todos os campos estejam untouched e pristine após o reset
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      control?.markAsUntouched();
+      control?.markAsPristine();
+      
+      if (control instanceof FormGroup) {
+        Object.keys(control.controls).forEach(nestedKey => {
+          const nestedControl = control.get(nestedKey);
+          nestedControl?.markAsUntouched();
+          nestedControl?.markAsPristine();
+        });
+      }
+    });
+    
+    this.onPaisChange('BR');
+    
+    // Garantir que o campo telefone esteja pristine e untouched após onPaisChange
+    // O p-inputMask pode marcar o campo como dirty/touched ao renderizar
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const telefoneControl = this.form.get('telefone');
+          if (telefoneControl && (telefoneControl.value === '' || telefoneControl.value === null)) {
+            telefoneControl.markAsPristine();
+            telefoneControl.markAsUntouched();
+          }
+        });
+      });
+    } 
   }
 
   private preencherFormulario(cliente: Cliente): void {
@@ -163,33 +211,64 @@ export class ClienteFormStore {
 
     const paisCodigo = this.obterCodigoPaisPorNome(cliente.pais || 'Brasil');
 
+    // Converter estado string (ex: "CE") para ID numérico
+    let estadoId: number | string = '';
+    if (cliente.endereco.estado) {
+      const estadoEncontrado = this.estados().find(e => 
+        e.sigla === cliente.endereco.estado || 
+        e.nome === cliente.endereco.estado ||
+        e.id.toString() === cliente.endereco.estado.toString()
+      );
+      estadoId = estadoEncontrado ? estadoEncontrado.id : '';
+    }
+
+    // Primeiro atualizar o país para carregar os estados filtrados
+    this.form.get('pais')?.setValue(paisCodigo, { emitEvent: false });
+    this.onPaisChange(paisCodigo);
+    
+    // Preencher tipoContato e telefone primeiro
+    this.form.get('tipoContato')?.setValue(cliente.tipoContato || 'Whatsapp', { emitEvent: false });
+    this.form.get('telefone')?.setValue(cliente.telefone || '', { emitEvent: false });
+    
+    // Preencher o restante do formulário (sem estado ainda)
     this.form.patchValue({
       id: cliente.id,
       nome: cliente.nome,
       email: cliente.email,
       cpf: cliente.cpf,
       dataNascimento,
-      tipoContato: cliente.tipoContato || 'Whatsapp',
-      telefone: cliente.telefone,
-      pais: paisCodigo,
       endereco: {
         cep: cliente.endereco.cep,
         logradouro: cliente.endereco.logradouro,
         numero: cliente.endereco.numero,
         complemento: cliente.endereco.complemento || '',
-        bairro: cliente.endereco.bairro,
-        cidade: cliente.endereco.cidade,
-        estado: cliente.endereco.estado
+        bairro: cliente.endereco.bairro
       },
       ativo: cliente.ativo
-    });
+    }, { emitEvent: false });
     
-    this.onPaisChange(paisCodigo);
-    
-    if (cliente.endereco.estado) {
-        this.onEstadoChange(cliente.endereco.estado);
+    // Preencher estado após os estados serem filtrados
+    if (estadoId) {
+      this.form.get('endereco.estado')?.setValue(estadoId, { emitEvent: false });
+      this.onEstadoChange(estadoId);
+      
+      // Preencher a cidade após os municípios estarem carregados
+      const municipiosCarregados = this.municipiosFiltrados();
+      if (municipiosCarregados.length > 0) {
+        const municipioEncontrado = municipiosCarregados.find(m => m.nome === cliente.endereco.cidade);
+        if (municipioEncontrado) {
+          this.form.get('endereco.cidade')?.setValue(cliente.endereco.cidade, { emitEvent: false });
+        } else {
+          // Se não encontrou, tentar preencher mesmo assim (pode ser que o nome seja diferente)
+          this.form.get('endereco.cidade')?.setValue(cliente.endereco.cidade, { emitEvent: false });
+        }
+      } else {
+        // Se não há municípios carregados ainda, preencher mesmo assim
+        this.form.get('endereco.cidade')?.setValue(cliente.endereco.cidade, { emitEvent: false });
+      }
     }
     
+    // Atualizar máscara do telefone após preencher tudo
     this.atualizarTelefoneMask();
   }
 
@@ -274,39 +353,117 @@ export class ClienteFormStore {
   }
 
   preencherComDadosAleatorios(): void {
-    const nomes = ['Ana', 'Bruno', 'Carlos', 'Daniela', 'Eduardo', 'Fernanda', 'Gabriel', 'Helena'];
-    const sobrenomes = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Lima'];
-    const tiposContato = ['Celular', 'Whatsapp', 'Residencial'];
+    const nomes = ['Ana', 'Bruno', 'Carlos', 'Daniela', 'Eduardo', 'Fernanda', 'Gabriel', 'Helena', 'Isabela', 'João', 'Kátia', 'Leonardo', 'Mariana', 'Nicolas', 'Olivia', 'Pedro'];
+    const sobrenomes = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Lima', 'Costa', 'Pereira', 'Carvalho', 'Gomes', 'Martins', 'Ribeiro', 'Almeida', 'Lopes'];
+    const tiposContato = ['Residencial', 'Fixo', 'Whatsapp'];
+    const logradouros = ['Rua', 'Avenida', 'Praça', 'Travessa', 'Alameda', 'Estrada'];
+    const nomesLogradouros = ['das Flores', 'do Comércio', 'Principal', 'Central', 'Nova', 'Velha', 'Brasil', 'Independência', 'Liberdade', 'República'];
+    const bairros = ['Centro', 'Jardim América', 'Vila Nova', 'Bela Vista', 'São José', 'Industrial', 'Residencial', 'Comercial', 'Universitário', 'Praia'];
     
-    const randomItem = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+    const randomItem = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
     const randomNum = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
     
+    // Gerar dados pessoais aleatórios
     const nome = `${randomItem(nomes)} ${randomItem(sobrenomes)}`;
-    const email = `${nome.toLowerCase().replace(/\s+/g, '.')}@exemplo.com`;
+    // Remover acentos e caracteres especiais do email
+    const emailBase = nome.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[^a-z0-9\s]/g, '') // Remove caracteres especiais
+      .replace(/\s+/g, '.'); // Substitui espaços por pontos
+    const email = `${emailBase}${randomNum(1, 999)}@exemplo.com`;
     const cpf = `${randomNum(100, 999)}.${randomNum(100, 999)}.${randomNum(100, 999)}-${randomNum(10, 99)}`;
-    const telefone = `(11) 9${randomNum(1000, 9999)}-${randomNum(1000, 9999)}`;
+    const tipoContato = randomItem(tiposContato);
     const nascimento = new Date(randomNum(1970, 2000), randomNum(0, 11), randomNum(1, 28));
     
-    const cep = '01001-000'; 
+    // Gerar telefone aleatório baseado no tipo
+    let telefone: string;
+    if (tipoContato === 'Whatsapp') {
+      telefone = `(${randomNum(11, 99)}) 9${randomNum(1000, 9999)}-${randomNum(1000, 9999)}`;
+    } else {
+      telefone = `(${randomNum(11, 99)}) ${randomNum(1000, 9999)}-${randomNum(1000, 9999)}`;
+    }
     
+    // Selecionar estado e cidade aleatórios
+    const estadosDisponiveis = this.estadosFiltrados().length > 0 
+      ? this.estadosFiltrados() 
+      : this.estados().filter(e => e.paisId === this.paises().find(p => p.codigo === 'BR')?.id);
+    
+    if (estadosDisponiveis.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Aviso',
+        detail: 'Carregue os dados de localização antes de preencher aleatoriamente.'
+      });
+      return;
+    }
+    
+    const estadoSelecionado = randomItem(estadosDisponiveis);
+    const municipiosDoEstado = this.municipios().filter(m => m.estadoId === estadoSelecionado.id);
+    const cidadeSelecionada = municipiosDoEstado.length > 0 
+      ? randomItem(municipiosDoEstado).nome 
+      : 'Cidade Aleatória';
+    
+    // Gerar CEP aleatório (formato brasileiro)
+    const cep = `${randomNum(10, 99)}.${randomNum(100, 999)}-${randomNum(100, 999)}`;
+    
+    // Gerar endereço aleatório
+    const logradouro = `${randomItem(logradouros)} ${randomItem(nomesLogradouros)}`;
+    const numero = randomNum(1, 9999).toString();
+    const complemento = randomNum(0, 3) === 0 ? '' : randomNum(0, 1) === 0 ? `Apto ${randomNum(1, 500)}` : `Bloco ${randomNum(1, 10)}`;
+    const bairro = randomItem(bairros);
+    
+    // Preencher país primeiro para garantir que a máscara seja configurada
+    this.form.get('pais')?.setValue('BR', { emitEvent: false });
+    this.onPaisChange('BR');
+    
+    // Preencher tipoContato primeiro
+    this.form.get('tipoContato')?.setValue(tipoContato, { emitEvent: false });
+    
+    // Atualizar máscara do telefone ANTES de preencher o valor
+    this.atualizarTelefoneMask();
+    
+    // Preencher o restante do formulário (sem telefone ainda)
     this.form.patchValue({
       nome,
       email,
       cpf,
       dataNascimento: nascimento,
-      tipoContato: randomItem(tiposContato),
-      telefone,
-      pais: 'BR',
+      tipoContato,
       endereco: {
         cep,
-        logradouro: 'Praça da Sé',
-        numero: randomNum(1, 999).toString(),
-        complemento: randomNum(0, 1) ? `Apto ${randomNum(1, 100)}` : '',
-        bairro: 'Sé',
-        cidade: 'São Paulo',
-        estado: 2 
+        logradouro,
+        numero,
+        complemento,
+        bairro,
+        cidade: cidadeSelecionada,
+        estado: estadoSelecionado.id
       }
-    });
+    }, { emitEvent: false });
+    
+    // Atualizar municípios após selecionar estado
+    this.onEstadoChange(estadoSelecionado.id);
+    
+    // Garantir que a máscara esteja correta antes de preencher o telefone
+    this.atualizarTelefoneMask();
+    
+    // Preencher telefone por último, após tudo estar configurado
+    // Usar requestAnimationFrame duplo para garantir que o componente p-inputMask esteja totalmente renderizado
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const telefoneControl = this.form.get('telefone');
+          if (telefoneControl) {
+            telefoneControl.setValue(telefone, { emitEvent: false });
+            // Garantir que a máscara esteja correta após preencher
+            this.atualizarTelefoneMask();
+          }
+        });
+      });
+    } else {
+      this.form.get('telefone')?.setValue(telefone, { emitEvent: false });
+      this.atualizarTelefoneMask();
+    }
   }
 
   private onPaisChange(paisCodigo: string): void {
@@ -372,10 +529,20 @@ export class ClienteFormStore {
     const telefoneControl = this.form.get('telefone');
     if (!telefoneControl) return;
 
+    const tipoContato = this.form.get('tipoContato')?.value;
     const digits = (telefoneControl.value || '').replace(/\D/g, '');
-    this.telefoneMask.set(
-      digits.length > 10 ? '(99) 9 9999-9999' : '(99) 9999-9999'
-    );
+    
+    // Determinar máscara baseado no tipo de contato ou no número de dígitos
+    if (tipoContato === 'Whatsapp') {
+      this.telefoneMask.set('(99) 9 9999-9999');
+    } else if (tipoContato === 'Residencial' || tipoContato === 'Fixo') {
+      this.telefoneMask.set('(99) 9999-9999');
+    } else {
+      // Fallback: usar número de dígitos se tipo não estiver definido
+      this.telefoneMask.set(
+        digits.length > 10 ? '(99) 9 9999-9999' : '(99) 9999-9999'
+      );
+    }
   }
 
   private obterCodigoPaisPorNome(nome: string): string {

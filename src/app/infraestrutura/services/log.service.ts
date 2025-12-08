@@ -27,14 +27,30 @@ export class LogService {
     return this.http.post<Log>(this.apiUrl, novoLog);
   }
 
+  /**
+   * Remove múltiplos logs de uma vez usando endpoint de remoção em lote
+   * @param ids Lista de IDs dos logs a serem removidos
+   */
+  excluirEmLote(ids: number[]): Observable<void> {
+    if (!ids || ids.length === 0) {
+      return of(undefined);
+    }
+    // Usa POST porque DELETE não suporta body em alguns casos
+    return this.http.post<void>(`${this.apiUrl}/bulk-delete`, { ids }).pipe(
+      map(() => undefined)
+    );
+  }
+
+  /**
+   * Limpa todos os logs usando remoção em lote
+   */
   limparTodosLogs(): Observable<void> {
     return this.listar().pipe(
       switchMap(logs => {
         if (!logs || logs.length === 0) return of(undefined);
-        const deleteObservables = logs.map(log => 
-          this.http.delete(`${this.apiUrl}/${log.id}`)
-        );
-        return forkJoin(deleteObservables).pipe(map(() => undefined));
+        // Coletar todos os IDs e fazer uma única chamada
+        const ids = logs.map(log => log.id);
+        return this.excluirEmLote(ids).pipe(map(() => undefined));
       })
     );
   }

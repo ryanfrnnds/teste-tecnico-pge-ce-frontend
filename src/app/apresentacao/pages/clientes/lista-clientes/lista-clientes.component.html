@@ -1,21 +1,22 @@
-<div class="lista-clientes-page flex flex-column flex-1 min-h-0 surface-ground gap-3">
+<app-lista-page-container>
   <app-confirm-modal
-    [(visible)]="modalExclusaoVisibleModel"
-    [title]="clienteParaExcluir()
-      ? (clienteParaExcluir()?.ativo ? 'Confirmar Inativação' : 'Confirmar Reativação')
+    [visible]="modalConfirmacaoVisible()"
+    (visibleChange)="modalConfirmacaoVisible.set($event)"
+    [title]="clienteParaAlterar()
+      ? (clienteParaAlterar()?.ativo ? 'Confirmar Inativação' : 'Confirmar Reativação')
       : (modoReativacao() ? 'Confirmar Reativação em Massa' : 'Confirmar Inativação em Massa')"
-    [message]="clienteParaExcluir()
-      ? 'Deseja realmente ' + (clienteParaExcluir()?.ativo ? 'inativar' : 'reativar') + ' o cliente ' + (clienteParaExcluir()?.nome || '') + '?'
+    [message]="clienteParaAlterar()
+      ? 'Deseja realmente ' + (clienteParaAlterar()?.ativo ? 'inativar' : 'reativar') + ' o cliente ' + (clienteParaAlterar()?.nome || '') + '?'
       : (modoReativacao()
         ? 'Deseja realmente reativar ' + clientesSelecionados().length + ' cliente(s) selecionado(s)?'
         : 'Deseja realmente inativar ' + clientesSelecionados().length + ' cliente(s) selecionado(s)?')"
-    [severity]="(clienteParaExcluir() ? !clienteParaExcluir()?.ativo : modoReativacao()) ? 'success' : 'danger'"
-    (confirm)="clienteParaExcluir() ? executarAlteracaoStatus() : executarExclusaoEmMassa()"
-    (cancel)="cancelarExclusao()"
+    [severity]="(clienteParaAlterar() ? !clienteParaAlterar()?.ativo : modoReativacao()) ? 'success' : 'danger'"
+    (confirm)="executarAlteracaoStatus()"
+    (cancel)="cancelarAlteracaoStatus()"
   ></app-confirm-modal>
 
-  <p-toolbar styleClass="surface-card border-round shadow-1 px-3 py-2">
-    <div class="flex flex-column md:flex-row md:align-items-center justify-content-between w-full gap-2">
+  <div slot="header">
+    <div class="flex flex-column md:flex-row md:align-items-center justify-content-between w-full gap-2 py-2">
       <div class="flex flex-column gap-1">
         <div class="flex align-items-center gap-2">
           <i class="pi pi-users text-primary text-xl"></i>
@@ -35,14 +36,12 @@
         ></p-button>
       </div>
     </div>
-  </p-toolbar>
+  </div>
 
-  <p-toolbar
-    styleClass="surface-card border-round shadow-1 px-3 py-3"
-  >
-    <form class="w-full" [formGroup]="filtrosForm" (ngSubmit)="aoPesquisar()">
+  <div slot="filters">
+    <p-toolbar styleClass="surface-card border-round shadow-1 px-3 py-3">
+    <form class="w-full" [formGroup]="filtrosForm">
       <div class="grid p-fluid">
-        <!-- Filtros Nome / Cidade -->
         <div class="col-12 md:col-4 flex flex-column gap-1">
           <p-floatLabel variant="on" class="w-full">
             <p-iconField iconPosition="right" class="w-full">
@@ -52,7 +51,6 @@
                 formControlName="nome"
                 class="w-full"
                 style="height: 3rem"
-                (keydown.enter)="aoPesquisar()"
               />
               <p-inputIcon
                 class="pi pi-times cursor-pointer text-500 hover:text-700"
@@ -72,7 +70,6 @@
                 formControlName="cidade"
                 class="w-full"
                 style="height: 3rem"
-                (keydown.enter)="aoPesquisar()"
               />
               <p-inputIcon
                 class="pi pi-times cursor-pointer text-500 hover:text-700"
@@ -83,87 +80,58 @@
           </p-floatLabel>
         </div>
 
-        <!-- Mobile: status (esquerda) + limpar (direita) -->
-        <div class="col-12 flex align-items-center justify-content-between gap-3 md:hidden">
-          <div class="flex align-items-center gap-2">
-            <div
-              class="status-filter-icon"
-              [ngClass]="{ 'active': filtroStatus() === 'todos' }"
-              (click)="filtrarPorStatus('todos')"
-              pTooltip="Mostrar todos os clientes"
-              tooltipPosition="bottom"
-            >
-              <i class="pi pi-users text-xl"
-                 [ngClass]="filtroStatus() === 'todos' ? 'text-primary-500' : 'text-600'"></i>
-              <span class="status-badge total-badge">
-                {{ contagemTotal() || 0 }}
-              </span>
-            </div>
-
-            <div
-              class="status-filter-icon"
-              [ngClass]="{ 'active': filtroStatus() === 'ativos' }"
-              (click)="filtrarPorStatus('ativos')"
-              pTooltip="Mostrar apenas clientes ativos"
-              tooltipPosition="bottom"
-            >
-              <i class="pi pi-user text-xl"
-                 [ngClass]="filtroStatus() === 'ativos' ? 'text-green-500' : 'text-600'"></i>
-              <span class="status-badge active-badge">
-                {{ contagemAtivos() || 0 }}
-              </span>
-            </div>
-
-            <div
-              class="status-filter-icon"
-              [ngClass]="{ 'active': filtroStatus() === 'inativos' }"
-              (click)="filtrarPorStatus('inativos')"
-              pTooltip="Mostrar apenas clientes inativos"
-              tooltipPosition="bottom"
-            >
-              <i class="pi pi-user-minus text-xl"
-                 [ngClass]="filtroStatus() === 'inativos' ? 'text-red-500' : 'text-600'"></i>
-              <span class="status-badge inactive-badge">
-                {{ contagemInativos() || 0 }}
-              </span>
-            </div>
+        <div class="col-12 flex align-items-center gap-2 md:hidden">
+          <div
+            class="status-filter-icon"
+            [ngClass]="{ 'active': filtroStatus() === 'todos' }"
+            (click)="filtrarPorStatus('todos')"
+            pTooltip="Mostrar todos os clientes"
+            tooltipPosition="bottom"
+          >
+            <i class="pi pi-users text-xl"
+               [ngClass]="filtroStatus() === 'todos' ? 'text-primary-500' : 'text-600'"></i>
+            <span class="status-badge total-badge">
+              {{ contagemTotal() || 0 }}
+            </span>
           </div>
 
-          <p-button
-            type="button"
-            label="Limpar"
-            icon="pi pi-eraser"
-            styleClass="p-button-outlined p-button-secondary"
-            (onClick)="limparFiltros()"
-          ></p-button>
-        </div>
+          <div
+            class="status-filter-icon"
+            [ngClass]="{ 'active': filtroStatus() === 'ativos' }"
+            (click)="filtrarPorStatus('ativos')"
+            pTooltip="Mostrar apenas clientes ativos"
+            tooltipPosition="bottom"
+          >
+            <i class="pi pi-user text-xl"
+               [ngClass]="filtroStatus() === 'ativos' ? 'text-green-500' : 'text-600'"></i>
+            <span class="status-badge active-badge">
+              {{ contagemAtivos() || 0 }}
+            </span>
+          </div>
 
-        <!-- Desktop: botão limpar alinhado à direita -->
-        <div class="col-12 md:col-4 justify-content-end align-items-center gap-2 hidden md:flex">
-          <p-button
-            type="button"
-            label="Limpar"
-            icon="pi pi-eraser"
-            styleClass="p-button-outlined p-button-secondary"
-            (onClick)="limparFiltros()"
-          ></p-button>
+          <div
+            class="status-filter-icon"
+            [ngClass]="{ 'active': filtroStatus() === 'inativos' }"
+            (click)="filtrarPorStatus('inativos')"
+            pTooltip="Mostrar apenas clientes inativos"
+            tooltipPosition="bottom"
+          >
+            <i class="pi pi-user-minus text-xl"
+               [ngClass]="filtroStatus() === 'inativos' ? 'text-red-500' : 'text-600'"></i>
+            <span class="status-badge inactive-badge">
+              {{ contagemInativos() || 0 }}
+            </span>
+          </div>
         </div>
       </div>
     </form>
-  </p-toolbar>
+    </p-toolbar>
+  </div>
 
-  <!-- Conteúdo -->
-  <div class="flex flex-column gap-3">
-    <div *ngIf="carregando$ | async" class="surface-card border-round shadow-1 p-3">
-      <div class="flex flex-column gap-3">
-        <p-skeleton height="3rem" *ngFor="let item of skeletonArray()"></p-skeleton>
-      </div>
-    </div>
-
-
+  <div slot="content" class="flex flex-column flex-1 overflow-hidden min-h-0">
     <div
       *ngIf="!(carregando$ | async) && clientes().length > 0"
-      class="flex flex-column gap-3 md:hidden"
+      class="flex flex-column gap-3 md:hidden overflow-y-auto"
     >
       <div
         class="surface-card border-round shadow-1 p-3 flex flex-column gap-3"
@@ -201,7 +169,7 @@
               [rounded]="true"
               [text]="true"
               [severity]="cliente.ativo ? 'danger' : 'success'"
-              (onClick)="confirmarAlteracaoStatus(cliente)"
+              (onClick)="abrirModalAlteracaoStatus(cliente)"
               (click)="$event.stopPropagation()"
               pTooltip="{{ cliente.ativo ? 'Inativar' : 'Reativar' }}"
               tooltipPosition="top"
@@ -240,24 +208,26 @@
       </div>
     </div>
 
-    <div
-      *ngIf="!(carregando$ | async)"
-      class="desktop-table-container hidden md:block surface-card border-round shadow-1"
-    >
-      <p-table
-        [value]="clientes()"
-        [paginator]="true"
-        [rows]="paginatorState().rows"
-        [first]="paginatorState().first"
-        [totalRecords]="totalRegistrosFiltrados()"
-        [rowsPerPageOptions]="[10,20,50]"
-        [lazy]="true"
-        [tableStyle]="{ 'min-width': '50rem' }"
-        styleClass="p-datatable-striped"
-        selectionMode="multiple"
-        [(selection)]="clientesSelecionadosModel"
-        (onPage)="onMudancaPagina($event)"
+    <div class="hidden md:block surface-card border-round shadow-1 flex flex-column flex-1 overflow-hidden min-h-0">
+      <app-lista-page-table-wrapper
+        [globalHeaderHeight]="60"
+        [mobileTabsHeight]="50"
+        [pageHeaderHeight]="80"
+        [filtersHeight]="120"
+        [gapsRem]="2"
+        [paginatorHeight]="48"
+        class="flex-1"
       >
+        <p-table
+          [value]="(carregando$ | async) ? getSkeletonArray() : clientes()"
+          [paginator]="false"
+          [loading]="false"
+          [tableStyle]="{ 'min-width': '50rem' }"
+          styleClass="p-datatable-striped"
+          [selectionMode]="(carregando$ | async) ? null : 'multiple'"
+          [selection]="clientesSelecionados()"
+          (selectionChange)="clientesSelecionados.set($event)"
+        >
         <ng-template pTemplate="header">
           <tr>
             <th [attr.colspan]="filtroStatus() === 'todos' ? 6 : 7" class="p-3">
@@ -313,10 +283,10 @@
 
                   <p-button
                     *ngIf="filtroStatus() !== 'todos'"
-                    [label]="modoReativacao() ? 'Reativar Selecionados' : 'Excluir Selecionados'"
+                    [label]="modoReativacao() ? 'Reativar Selecionados' : 'Inativar Selecionados'"
                     [icon]="modoReativacao() ? 'pi pi-user-plus' : 'pi pi-trash'"
                     [disabled]="clientesSelecionados().length === 0"
-                    (onClick)="confirmarExclusaoEmMassa()"
+                    (onClick)="abrirModalAlteracaoStatusEmMassa()"
                     [styleClass]="modoReativacao() ? 'p-button-success p-button-sm' : 'p-button-danger p-button-sm'"
                   ></p-button>
                 </div>
@@ -336,8 +306,13 @@
           </tr>
         </ng-template>
 
-        <ng-template pTemplate="body" let-cliente>
-          <tr (click)="onLinhaClienteClick(cliente)" class="cursor-pointer">
+        <ng-template pTemplate="body" let-cliente let-rowIndex="rowIndex">
+          <tr *ngIf="(carregando$ | async)">
+            <td [attr.colspan]="filtroStatus() === 'todos' ? 6 : 7" class="p-3">
+              <p-skeleton height="3rem"></p-skeleton>
+            </td>
+          </tr>
+          <tr *ngIf="!(carregando$ | async) && cliente && cliente.nome">
             <td>
               <div class="flex align-items-center gap-2">
                 <div class="flex align-items-center justify-content-center border-circle bg-primary text-white w-2rem h-2rem flex-shrink-0">
@@ -375,7 +350,6 @@
                   [text]="true"
                   severity="info"
                   (onClick)="editarCliente(cliente)"
-                  (click)="$event.stopPropagation()"
                   pTooltip="Editar"
                   tooltipPosition="top"
                 ></p-button>
@@ -384,21 +358,20 @@
                   [rounded]="true"
                   [text]="true"
                   [severity]="cliente.ativo ? 'danger' : 'success'"
-                  (onClick)="confirmarAlteracaoStatus(cliente)"
-                  (click)="$event.stopPropagation()"
+                  (onClick)="abrirModalAlteracaoStatus(cliente)"
                   pTooltip="{{ cliente.ativo ? 'Inativar' : 'Reativar' }}"
                   tooltipPosition="top"
                 ></p-button>
               </div>
             </td>
-            <td *ngIf="filtroStatus() !== 'todos'">
-              <p-tableCheckbox [value]="cliente"></p-tableCheckbox>
+            <td *ngIf="filtroStatus() !== 'todos'" (click)="$event.stopPropagation()">
+              <p-tableCheckbox [value]="cliente" (click)="$event.stopPropagation()"></p-tableCheckbox>
             </td>
           </tr>
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
-          <tr>
+          <tr *ngIf="!(carregando$ | async)">
             <td [attr.colspan]="filtroStatus() === 'todos' ? 6 : 7" class="text-center py-6">
               <div class="flex flex-column align-items-center gap-3">
                 <i class="pi pi-inbox text-4xl text-500"></i>
@@ -406,25 +379,14 @@
                 <p class="m-0 text-sm" *ngIf="!nenhumClienteCadastrado()">
                   Tente ajustar os filtros para encontrar o que procura.
                 </p>
-                          <p class="m-0 text-sm" *ngIf="nenhumClienteCadastrado() && !ambienteDesenvolvimento">
+                          <p class="m-0 text-sm" *ngIf="nenhumClienteCadastrado()">
                             Comece cadastrando seu primeiro cliente.
                           </p>
-                          <p class="m-0 text-sm" *ngIf="nenhumClienteCadastrado() && ambienteDesenvolvimento">
-                  Ambiente de desenvolvimento: você pode inserir rapidamente 20 clientes de teste para explorar a tela.
-                </p>
                 <div class="flex flex-column md:flex-row gap-2 mt-3" *ngIf="nenhumClienteCadastrado()">
                   <p-button
-                    *ngIf="!ambienteDesenvolvimento"
                     label="Cadastrar Cliente"
                     icon="pi pi-plus"
                     (onClick)="novoCliente()"
-                    styleClass="p-button-success"
-                  ></p-button>
-                  <p-button
-                    *ngIf="ambienteDesenvolvimento"
-                    label="Inserir 20 clientes de teste"
-                    icon="pi pi-users"
-                    (onClick)="inserirClientesTeste()"
                     styleClass="p-button-success"
                   ></p-button>
                 </div>
@@ -433,6 +395,8 @@
           </tr>
         </ng-template>
       </p-table>
+      </app-lista-page-table-wrapper>
     </div>
   </div>
-</div>
+
+</app-lista-page-container>

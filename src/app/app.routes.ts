@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@infraestrutura/guards/auth.guard';
+import { clienteResolver } from './apresentacao/pages/clientes/cliente-form/cliente.resolver';
 
 export const routes: Routes = [
   {
@@ -34,7 +35,8 @@ export const routes: Routes = [
       import('./apresentacao/pages/clientes/cliente-form/cliente-form.component').then(
         (m) => m.ClienteFormComponent
       ),
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    resolve: { formData: clienteResolver }
   },
   {
     path: 'logs',

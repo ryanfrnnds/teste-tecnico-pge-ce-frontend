@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { Cliente } from '@dominio/models/cliente.model';
 import { LogOperation } from '@infraestrutura/decorators/log-operation.decorator';
 import { LoggerService } from './logger.service';
@@ -177,16 +177,26 @@ export class ClienteService {
    * @param cliente Campos a serem atualizados
    * @returns Observable com cliente atualizado
    */
-  @LogOperation('ATUALIZACAO', (args, result) => {
-    const changes = args[1];
-    const cliente = result;
-    if (changes.ativo === true) {
-      return `Cliente "${cliente.nome}" foi reativado`;
-    } else if (changes.ativo === false) {
-      return `Cliente "${cliente.nome}" foi desativado`;
+  @LogOperation(
+    (args, result) => {
+      const changes = args[1] || {};
+      if (changes.ativo === false) {
+        return 'INATIVACAO';
+      }
+      return 'ATUALIZACAO';
+    },
+    (args, result) => {
+      const changes = args[1] || {};
+      const cliente = result;
+      if (changes.ativo === true) {
+        return `Cliente "${cliente.nome}" foi reativado`;
+      }
+      if (changes.ativo === false) {
+        return `Cliente "${cliente.nome}" foi desativado`;
+      }
+      return `Cliente "${cliente.nome}" teve dados atualizados`;
     }
-    return `Cliente "${cliente.nome}" teve dados atualizados`;
-  })
+  )
   atualizar(id: string, cliente: Partial<Cliente>): Observable<Cliente> {
     return this.http.patch<Cliente>(`${this.apiUrl}/${id}`, cliente);
   }
@@ -237,14 +247,53 @@ export class ClienteService {
       })
     );
   }
+  /**
+   * Inativa múltiplos clientes de uma vez usando endpoint de inativação em lote
+   * @param clientes Lista de clientes completos a serem inativados
+   */
+  inativarEmLote(clientes: Cliente[]): Observable<void> {
+    if (!clientes || clientes.length === 0) {
+      return of(undefined);
+    }
+    const ids = clientes.map(c => c.id);
+    return this.http.patch<void>(`${this.apiUrl}/bulk-inactivate`, { ids }).pipe(
+      tap(() => {
+        if (this.logger) {
+          // Registrar um log para cada cliente inativado
+          const nomes = clientes.map(c => c.nome).join(', ');
+          clientes.forEach(cliente => {
+            this.logger.registrar('INATIVACAO', `Cliente "${cliente.nome}" inativado`);
+          });
+        }
+      }),
+      map(() => undefined)
+    );
+  }
+
+  /**
+   * Remove múltiplos clientes de uma vez usando endpoint de remoção em lote (remoção física)
+   * @param ids Lista de IDs dos clientes a serem removidos
+   * Este método deve ser usado SOMENTE para limpar a base de dados
+   */
+  excluirEmLote(ids: string[]): Observable<void> {
+    if (!ids || ids.length === 0) {
+      return of(undefined);
+    }
+    return this.http.post<void>(`${this.apiUrl}/bulk-delete`, { ids }).pipe(
+      map(() => undefined)
+    );
+  }
+
+  /**
+   * Limpa toda a base de dados de clientes usando remoção em lote
+   */
   limparBaseDeDados(): Observable<void> {
     return this.listar().pipe(
       switchMap(clientes => {
         if (clientes.length === 0) return of(undefined);
-        const deleteObservables = clientes.map(c => 
-          this.http.delete(`${this.apiUrl}/${c.id}`)
-        );
-        return forkJoin(deleteObservables).pipe(map(() => undefined));
+        // Coletar todos os IDs e fazer uma única chamada
+        const ids = clientes.map(c => c.id);
+        return this.excluirEmLote(ids).pipe(map(() => undefined));
       })
     );
   }

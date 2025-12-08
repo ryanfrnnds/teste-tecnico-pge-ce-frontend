@@ -1,8 +1,73 @@
-/* Layout e responsividade desta página são definidos apenas com PrimeFlex e estilos dos componentes PrimeNG. */
-
 .lista-clientes-page {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  > p-toolbar {
+    flex-shrink: 0;
+  }
+
+  > div:last-child {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
   .desktop-table-container {
-    margin-bottom: var(--pge-spacing-lg);
+    margin-bottom: 0;
+    height: calc(100vh - 60px - 50px - 80px - 120px - 2rem);
+    max-height: calc(100vh - 60px - 50px - 80px - 120px - 2rem);
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    
+    ::ng-deep .p-datatable {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+      max-height: 100%;
+      
+      .p-datatable-header {
+        flex-shrink: 0;
+      }
+      
+      .p-datatable-wrapper {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        overflow-x: auto;
+        min-height: 0;
+        position: relative;
+        display: block;
+      }
+      
+      .p-datatable-table {
+        width: 100%;
+        table-layout: auto;
+      }
+      
+      .p-datatable-thead {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: var(--surface-ground);
+      }
+      
+      .p-datatable-tbody {
+        display: table-row-group;
+      }
+      
+      .p-paginator {
+        flex-shrink: 0;
+        margin-top: auto;
+      }
+    }
   }
 
   ::ng-deep .autocomplete-item {
@@ -51,66 +116,6 @@
     }
   }
 
-  .status-filter-icon {
-    position: relative;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    border: 2px solid transparent;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-      transform: scale(1.05);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    &.active {
-      background-color: rgba(var(--primary-color-rgb), 0.1);
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(var(--primary-color-rgb), 0.15);
-      border-color: var(--primary-color);
-    }
-
-    i {
-      transition: all 0.2s ease;
-    }
-
-    .status-badge {
-      position: absolute;
-      top: -3px;
-      right: -3px;
-      min-width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: white;
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-      &.total-badge {
-        background: linear-gradient(135deg, #6b7280, #4b5563);
-      }
-
-      &.active-badge {
-        background: linear-gradient(135deg, #10b981, #059669);
-      }
-
-      &.inactive-badge {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-      }
-    }
-  }
 
   .p-dark-theme .status-badge {
     border-color: var(--surface-section);
