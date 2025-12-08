@@ -1,0 +1,218 @@
+services:
+  # Serviço JSON Server (API mock)
+  # Usa a mesma imagem do Angular pois json-server está instalado no package.json do Angular
+  json-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.angular
+    container_name: teste-pge-json-server
+    ports:
+      - "3000:3000"
+    volumes:
+      # Montar o código completo para ter acesso ao node_modules e json-server
+      - .:/app
+      - /app/node_modules  # Preservar node_modules da imagem
+    networks:
+      - teste-pge-network
+    environment:
+      - PORT=3000
+    command: npm run start:json
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/clientes"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Serviço Angular (Desenvolvimento)
+  angular:
+    build:
+      context: .
+      dockerfile: Dockerfile.angular
+    container_name: teste-pge-angular
+    ports:
+      - "4200:4200"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.angular
+    networks:
+      - teste-pge-network
+    depends_on:
+      json-server:
+        condition: service_healthy
+    environment:
+      - API_PROXY_HOST=json-server
+      - CHROME_BIN=/usr/bin/chromium
+      - DISPLAY=:99
+    command: npm start
+    stdin_open: true
+    tty: true
+
+
+  # Serviço para rodar testes Karma
+  # Não precisa de json-server nem Angular pois usa HttpClientTestingModule (mocks)
+  karma:
+    build:
+      context: .
+      dockerfile: Dockerfile.angular
+    container_name: teste-pge-karma
+    ports:
+      - "9876:9876"  # Karma server
+      - "9222:9222"  # Chrome remote debugging
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.angular
+      - ./coverage:/app/coverage
+    networks:
+      - teste-pge-network
+    environment:
+      - CHROME_BIN=/usr/bin/chromium
+      - DISPLAY=:99
+      - KARMA_REMOTE=false
+    command: >
+      sh -c "Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset > /dev/null 2>&1 &
+             npx ng test --code-coverage --browsers=ChromeHeadlessNoSandbox"
+    profiles:
+      - tests
+
+  # Serviço para rodar testes Karma com browser remoto (permite conectar browser local)
+  # Não precisa de json-server nem Angular pois usa HttpClientTestingModule (mocks)
+  karma-remote:
+    build:
+      context: .
+      dockerfile: Dockerfile.angular
+    container_name: teste-pge-karma-remote
+    ports:
+      - "9876:9876"  # Karma server
+      - "9222:9222"  # Chrome remote debugging
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.angular
+      - ./coverage:/app/coverage
+    networks:
+      - teste-pge-network
+    environment:
+      - CHROME_BIN=/usr/bin/chromium
+      - DISPLAY=:99
+      - KARMA_REMOTE=true
+    command: >
+      sh -c "Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset > /dev/null 2>&1 &
+             npx ng test --watch --browsers '' --progress=false"
+    profiles:
+      - tests
+
+  # JSON Server exclusivo para testes Cypress
+  json-server-cypress:
+    build:
+      context: .
+      dockerfile: Dockerfile.angular
+    container_name: teste-pge-json-server-cypress
+    ports:
+      - "3002:3002"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - teste-pge-network
+    environment:
+      - PORT=3002
+    command: sh -c "node json-server/server.js"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/clientes"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    profiles:
+      - tests
+
+  # Serviço Angular para testes Cypress (usa json-server-cypress)
+  angular-cypress:
+    build:
+      context: .
+      dockerfile: Dockerfile.angular
+    container_name: teste-pge-angular-cypress
+    ports:
+      - "4201:4200"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.angular
+    networks:
+      - teste-pge-network
+    depends_on:
+      json-server-cypress:
+        condition: service_healthy
+    environment:
+      - API_PROXY_HOST=json-server-cypress
+      - API_PROXY_PORT=3002
+      - CHROME_BIN=/usr/bin/chromium
+      - DISPLAY=:99
+    command: npm start
+    profiles:
+      - tests
+
+  # Serviço para rodar Cypress com VNC (visualização do browser)
+  cypress:
+    build:
+      context: .
+      dockerfile: Dockerfile.cypress
+    container_name: teste-pge-cypress
+    ports:
+      - "6080:6080"  # noVNC (web-based VNC client)
+      - "5900:5900"  # VNC server
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - cypress-screenshots:/app/cypress/screenshots
+      - cypress-videos:/app/cypress/videos
+    networks:
+      - teste-pge-network
+    depends_on:
+      angular-cypress:
+        condition: service_started
+      json-server-cypress:
+        condition: service_healthy
+    environment:
+      - CYPRESS_baseUrl=http://angular-cypress:4200
+      - DISPLAY=:99
+      - VNC_PASSWORD=cypress
+    profiles:
+      - tests
+
+  # Serviço alternativo para Cypress headless (sem visualização)
+  cypress-headless:
+    build:
+      context: .
+      dockerfile: Dockerfile.cypress
+    container_name: teste-pge-cypress-headless
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - cypress-screenshots:/app/cypress/screenshots
+      - cypress-videos:/app/cypress/videos
+    networks:
+      - teste-pge-network
+    depends_on:
+      angular-cypress:
+        condition: service_started
+      json-server-cypress:
+        condition: service_healthy
+    environment:
+      - CYPRESS_baseUrl=http://angular-cypress:4200
+      - DISPLAY=:99
+    command: sh -c "Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset > /dev/null 2>&1 & sleep 2 && npx cypress run"
+    profiles:
+      - tests
+
+networks:
+  teste-pge-network:
+    driver: bridge
+
+volumes:
+  cypress-screenshots:
+  cypress-videos:
+

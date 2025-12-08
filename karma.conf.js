@@ -1,4 +1,7 @@
 module.exports = function (config) {
+  const isRemote = process.env.KARMA_REMOTE === 'true';
+  const browsers = isRemote ? [] : ['ChromeHeadlessNoSandbox'];
+
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
@@ -16,9 +19,12 @@ module.exports = function (config) {
         seed: '4321',
         stopOnFailure: false,
         failFast: false,
-        timeoutInterval: 10000
+        timeoutInterval: 60000
       },
-      clearContext: false
+      clearContext: false,
+      captureConsole: true,
+      runInParent: false,
+      useIframe: true
     },
     jasmineHtmlReporter: {
       suppressAll: false // Permite exibir a interface HTML do Jasmine
@@ -47,24 +53,47 @@ module.exports = function (config) {
         skipped: '- '
       }
     },
-    browsers: ['ChromeHeadlessNoSandbox'], // Usa headless por padrão, mas mantém interface web ativa
+    browsers,
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
         flags: ['--no-sandbox', '--disable-gpu']
       },
       Chrome: {
-        base: 'Chrome',
+        base: 'ChromeHeadless',
         flags: ['--no-sandbox', '--disable-gpu', '--remote-debugging-port=9222']
+      },
+      ChromeRemote: {
+        base: 'Chrome',
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--remote-debugging-port=9222',
+          '--remote-debugging-address=0.0.0.0'
+        ]
       }
     },
-    autoWatch: true,
-    singleRun: false,
-    restartOnFileChange: true,
+    autoWatch: isRemote,
+    singleRun: !isRemote,
+    restartOnFileChange: isRemote,
+    // Permite que browsers externos se conectem (modo capture)
+    captureTimeout: 300000,
+    browserDisconnectTimeout: 60000,
+    browserDisconnectTolerance: 10,
+    browserNoActivityTimeout: 300000,
+    pingTimeout: 60000,
+    concurrency: Infinity,
     colors: true,
     logLevel: config.LOG_INFO,
     // Permite acesso externo ao Karma
     listenAddress: '0.0.0.0',
     port: 9876,
+    hostname: '0.0.0.0',
+    // Quando não há browsers configurados, o Karma entra em modo de captura
+    // Isso permite que browsers externos se conectem via http://localhost:9876
+    transportSecurity: false,
+    // Configurações adicionais para melhorar a conexão com browsers externos
+    protocol: 'http',
+    proxies: {},
   });
 };

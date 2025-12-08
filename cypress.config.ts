@@ -1,8 +1,11 @@
 import { defineConfig } from 'cypress';
 
+// Usa variável de ambiente se disponível (Docker), senão usa localhost
+const baseUrl = process.env.CYPRESS_baseUrl || 'http://localhost:4200';
+
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:4200',
+    baseUrl,
     specPattern: 'cypress/e2e/**/*.cy.ts',
     supportFile: 'cypress/support/e2e.ts',
     video: false,

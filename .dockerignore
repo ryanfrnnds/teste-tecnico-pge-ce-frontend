@@ -1,0 +1,42 @@
+# Dependências
+node_modules
+npm-debug.log
+# package-lock.json - NÃO ignorar, necessário para npm ci
+
+# Build outputs
+dist
+.angular
+coverage
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Testes
+cypress/screenshots
+cypress/videos
+cypress/downloads
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+

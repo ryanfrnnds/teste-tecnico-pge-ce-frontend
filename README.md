@@ -59,14 +59,70 @@ O foco não foi apenas "fazer funcionar", mas estruturar uma aplicação escalá
 
 Para atender aos requisitos com excelência, adotei diversas decisões estratégicas:
 
-### ~~1. Abordagem "Docker First"~~ (Deprecado)
+### 1. Suporte Docker Completo
 
-~~Adotei uma mentalidade "Docker First" para garantir que o ambiente de execução seja idêntico para todos os desenvolvedores, independentemente do sistema operacional (Windows, Linux, Mac).~~
-- ~~**Consistência:** Eliminei o famoso "na minha máquina funciona". O ambiente é containerizado, garantindo versões exatas de Node.js, Nginx e dependências.~~
-- ~~**Facilidade:** Com um único comando, subo toda a infraestrutura necessária (Frontend + Backend Mock), sem a necessidade de instalar ferramentas complexas localmente além do Docker.~~
-- ~~**Scripts de automação:** A pasta `scripts/` continha scripts facilitadores (Bash e PowerShell) para executar comandos Docker de forma simplificada (`start.sh`, `test-unit.sh`, `test-e2e.sh`, etc.).~~
+O projeto agora inclui uma configuração completa do Docker Compose com suporte a:
+- **Desenvolvimento:** Angular Dev Server + JSON Server
+- **Testes Unitários (Karma):** Com interface web acessível em `http://localhost:9876`
+- **Testes E2E (Cypress):** Com visualização do browser via VNC (acesse `http://localhost:6080/vnc.html`)
 
-**Motivo da deprecação:** Apesar dos testes unitários (Jasmine/Karma) e E2E (Cypress) funcionarem corretamente via terminal em modo headless dentro do Docker, não consegui configurar a abertura dos browsers de forma confiável para visualização interativa. A interface web do Karma e a interface interativa do Cypress Test Runner não funcionaram adequadamente quando executadas dentro de containers Docker, mesmo com configurações de portas e acesso externo. Como a visualização interativa dos testes é importante para revisão e debug, optei por remover o Docker da stack de desenvolvimento. Com isso, a pasta `scripts/` também foi removida, pois seus scripts eram específicos para execução via Docker. *Nota: Caso queira consultar os scripts Docker que foram removidos, eles ainda estão disponíveis nos commits anteriores do repositório.* Agora todos os comandos são executados diretamente via `npm` conforme documentado na seção [🚀 Como Executar Localmente](#-como-executar-localmente). Veja mais detalhes na seção [📝 Decisão sobre Docker](#-decisão-sobre-docker).
+**Benefícios:**
+- **Consistência:** Ambiente idêntico para todos os desenvolvedores, independentemente do sistema operacional
+- **Isolamento:** Não interfere com instalações locais do Node.js
+- **Visualização completa:** Browsers funcionando perfeitamente via VNC para Cypress e interface web para Karma
+
+**Como usar:**
+Veja a documentação completa em [docker/README.md](./docker/README.md) ou o guia rápido em [docker/QUICKSTART.md](./docker/QUICKSTART.md).
+
+**Nota:** Preferencialmente use Docker. O uso local com `npm` permanece descrito mais adiante, mas priorize os comandos Docker abaixo.
+
+---
+
+## 🚀 Como executar com Docker (preferencial)
+
+### App + JSON Server (aplicação)
+```bash
+./docker/scripts.sh up
+# Angular: http://localhost:4200
+# JSON Server (aplicação): http://localhost:3000
+```
+
+### Karma
+- Headless + coverage:
+```bash
+./docker/scripts.sh test
+```
+Relatório: `coverage/teste-pge/index.html` (abra no navegador).
+
+- Modo remoto (browser local via capture):
+```bash
+./docker/scripts.sh test:remote
+```
+Acesse `http://localhost:9876` e clique em **Debug** para capturar o browser.
+
+### Cypress
+<!-- - Browser via VNC (tudo no Docker):  AINDA NAO CONSEGUI FAZER FUNCIONAR COM VNC...
+```bash
+./docker/scripts.sh cypress
+```
+Acesse `http://localhost:6080/vnc.html` (senha: `cypress`), escolha o browser (Chrome) e rode os specs. -->
+
+- Sem browser
+```bash
+./docker/scripts.sh cypress:headless
+```
+
+- Browser local (opcional - caso o VNC nao funcione.):
+```bash
+docker-compose --profile tests up angular-cypress json-server-cypress
+npm install
+CYPRESS_baseUrl=http://localhost:4201 npx cypress open
+```
+
+### Parar
+```bash
+./docker/scripts.sh down
+```
 
 ### 1. Arquitetura em Camadas e Organização das Pastas
 
@@ -275,7 +331,7 @@ A qualidade foi assegurada através de uma pirâmide de testes diversificada, co
 
 ---
 
-## 🚀 Como Executar Localmente
+## 🚀 Como Executar Localmente (Opcional) - Abaixo tem a versao com DOCKER
 
 ### Pré-requisitos
 
@@ -332,7 +388,7 @@ npm run start
 npm run start:json
 ```
 
-### Executando Testes
+### Executando Testes 
 
 #### Testes Unitários (Karma & Jasmine)
 
@@ -415,23 +471,62 @@ Os arquivos compilados estarão na pasta `dist/teste-pge/`.
 
 ---
 
-## 📝 Decisão sobre Docker
+## 🐳 Docker (Principal)
 
-Como mencionado na seção de [Decisões Arquiteturais](#-decisões-arquiteturais-e-técnicas), inicialmente adotei uma abordagem "Docker First", mas decidi removê-la durante o desenvolvimento.
+O projeto inclui uma configuração completa do Docker Compose que permite executar todo o ambiente de desenvolvimento e testes dentro de containers Docker. Dessa forma evitando qualquer problema relacionado a maquina desde que se tenha o docker corretamente instalado.
 
-**Resumo dos problemas técnicos:**
-- **Jasmine/Karma:** Embora os testes executassem corretamente em modo headless via terminal dentro do Docker, a interface web do Karma (disponível em `http://localhost:9876`) não funcionava adequadamente para visualização interativa dos resultados, mesmo com configurações de portas e acesso externo.
-- **Cypress:** Similarmente, os testes E2E funcionavam em modo headless, mas a interface interativa do Cypress Test Runner não operava corretamente dentro de containers Docker, impedindo a visualização e debug dos testes em tempo real.
+### Por que usar Docker?
 
-**Decisão final:**
-Optei por remover o Docker da stack de desenvolvimento para garantir que o revisor possa:
-1. Visualizar os testes unitários no browser do Jasmine/Karma de forma nativa e interativa
-2. Executar os testes E2E do Cypress com interface visual completa
-3. Ter uma experiência de desenvolvimento mais direta e sem camadas de abstração que possam complicar o debug
+- **Consistência:** Ambiente idêntico para todos os desenvolvedores
+- **Isolamento:** Não interfere com instalações locais
+- **Visualização completa:** Browsers funcionando via VNC (Cypress) e interface web (Karma)
 
-Embora o Docker ofereça benefícios de isolamento e consistência, acredito que para um teste técnico, a capacidade de visualizar e interagir com os testes é mais valiosa do que a garantia de ambiente idêntico. Em um ambiente de produção ou CI/CD, essas limitações poderiam ser contornadas com configurações mais complexas, mas isso estava além do escopo deste projeto.
+### Início Rápido
+- App + JSON Server (aplicação):
+```bash
+./docker/scripts.sh up
+# Angular: http://localhost:4200
+# JSON Server (app): http://localhost:3000
+```
 
-**Pré-condições para execução local:**
+- Karma headless + coverage:
+```bash
+./docker/scripts.sh test
+```
+Relatório: `coverage/teste-pge/index.html` Abrindo em sua maquina.
+```bash
+open coverage/teste-pge/index.html  # macOS
+xdg-open coverage/teste-pge/index.html  # Linux
+start coverage/teste-pge/index.html  # Windows
+```  
+
+- Karma remoto (browser local):
+```bash
+./docker/scripts.sh test:remote
+```
+Abra `http://localhost:9876` e clique em **Debug**.
+
+- Cypress com browser via VNC (tudo no Docker):
+```bash
+./docker/scripts.sh cypress
+```
+Abra `http://localhost:6080/vnc.html` (senha: `cypress`), escolha o browser (Chrome) e rode os specs.
+
+- Cypress com browser local (opcional):
+```bash
+docker-compose --profile tests up angular-cypress json-server-cypress
+CYPRESS_baseUrl=http://localhost:4201 npx cypress open
+```
+
+### Documentação Completa
+
+- **Guia rápido:** [docker/QUICKSTART.md](./docker/QUICKSTART.md)
+- **Documentação completa:** [docker/README.md](./docker/README.md)
+
+---
+
+## 📝 Pré-condições para Execução Local (sem Docker)
+
 - Node.js 18+ instalado
 - Electron (vem com Cypress) - Recomendado para evitar avisos de senha insegura durante os testes E2E
 - Portas 4200 (Angular) e 3000 (JSON Server) disponíveis

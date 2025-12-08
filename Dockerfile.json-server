@@ -1,0 +1,25 @@
+# Dockerfile para JSON Server
+FROM node:22.12.0
+
+# Instalar wget para healthcheck
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app/json-server
+
+# Criar package.json e instalar json-server localmente
+RUN npm init -y && npm install json-server@latest
+
+# Copiar apenas os arquivos necessários (NÃO copiar node_modules)
+COPY json-server/server.js ./
+COPY json-server/db.json ./
+COPY json-server/db.test.json ./
+
+# Copiar script de inicialização que garante node_modules no volume
+COPY docker/json-server-start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Expor porta do json-server
+EXPOSE 3000
+
+# Usar script de inicialização
+ENTRYPOINT ["/start.sh"]

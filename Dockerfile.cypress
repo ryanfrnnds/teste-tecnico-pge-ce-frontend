@@ -1,0 +1,49 @@
+# Dockerfile para Cypress com suporte a VNC (visualização do browser)
+# Usa imagem incluída (já vem com Chrome/ff/Edge e Cypress)
+FROM cypress/included:13.6.4
+
+# Remover repositórios problemáticos herdados da imagem base
+RUN rm -f /etc/apt/sources.list.d/google-chrome.list \
+    /etc/apt/sources.list.d/microsoft-edge*.list || true
+
+# Instalar VNC e dependências para visualização remota
+RUN apt-get update && apt-get install -y \
+    x11vnc \
+    xvfb \
+    fluxbox \
+    novnc \
+    websockify \
+    wget \
+    curl \
+    git \
+    python3 \
+    python3-pip \
+    net-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Criar diretório de trabalho
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+
+RUN npm ci
+
+# Copiar código fonte
+COPY . .
+
+# Configurar VNC
+ENV DISPLAY=:99
+ENV VNC_PASSWORD=cypress
+
+# Expor portas
+# 5900 - VNC server
+# 6080 - noVNC (web-based VNC client)
+EXPOSE 5900 6080
+
+# Script para iniciar VNC e Cypress
+COPY docker/cypress-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+

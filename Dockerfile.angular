@@ -1,0 +1,34 @@
+# Dockerfile para Angular - Desenvolvimento e Testes
+FROM node:22.12.0
+
+# Instalar dependências do sistema para Chrome e ferramentas de desenvolvimento
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configurar variáveis de ambiente
+ENV CHROME_BIN=/usr/bin/chromium
+ENV DISPLAY=:99
+
+# Criar diretório de trabalho
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+
+# Instalar dependências
+RUN npm ci
+
+# Copiar código fonte
+COPY . .
+
+# Expor portas
+# 4200 - Angular dev server
+# 9876 - Karma test server
+EXPOSE 4200 9876
+
+# Comando padrão (pode ser sobrescrito no docker-compose)
+CMD ["npm", "start"]
+
