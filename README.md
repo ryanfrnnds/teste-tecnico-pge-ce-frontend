@@ -40,7 +40,23 @@ src/app/
   app.component.ts
 ```
 
-Ou seja: usei esse teste como sandbox para entender melhor o caminho que o Angular está propondo, e agora consigo transitar com segurança tanto na abordagem “por camadas” quanto na organização “por features”.
+Ou seja: usei esse teste como sandbox para entender melhor o caminho que o Angular está propondo, e agora consigo transitar com segurança tanto na abordagem "por camadas" quanto na organização "por features".
+
+---
+
+## 📑 Índice
+
+- [🎯 O Desafio](#-o-desafio)
+- [🏗️ Decisões Arquiteturais](#️-decisões-arquiteturais)
+  - [Arquitetura em Camadas](#arquitetura-em-camadas)
+  - [Reatividade Moderna (Angular 17+)](#reatividade-moderna-angular-17)
+  - [UI/UX e Estilização](#uiux-e-estilização)
+  - [Boas Práticas de Roteamento](#boas-práticas-de-roteamento)
+  - [Padrões e Convenções](#padrões-e-convenções)
+- [🐳 Como Executar com Docker](#-como-executar-com-docker)
+- [✅ Estratégia de Testes](#-estratégia-de-testes)
+- [🔒 Dados Pessoais e LGPD](#-dados-pessoais-e-lgpd)
+- [📝 Execução Local (Opcional)](#-execução-local-opcional)
 
 ---
 
